@@ -242,6 +242,10 @@ function handleDeleteStaff($conn)
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['password'])) {
+            $stmt = $conn->prepare('UPDATE users SET created_by = NULL WHERE created_by = ?');
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+
             $stmt = $conn->prepare('DELETE FROM users WHERE id = ?');
             $stmt->bind_param('s', $id);
             if ($stmt->execute()) {

@@ -36,7 +36,10 @@ if (isset($_GET['id'])) {
             ) > 0 THEN 'Meminjam'
             ELSE 'Tidak Meminjam'
         END AS status,
-        users.name AS created_by_name
+        CASE
+            WHEN members.created_by IS NULL THEN '[Staff Dihapus]'
+            ELSE users.name
+        END AS created_by_name
     FROM members
         LEFT JOIN loans ON members.id = loans.member_id
         LEFT JOIN users ON members.created_by = users.id

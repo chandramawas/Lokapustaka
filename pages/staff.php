@@ -7,10 +7,17 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
     $sql = "
-    SELECT a.*, b.name AS created_by_name
+    SELECT
+        a.*,
+        CASE
+            WHEN a.created_by IS NULL
+            AND a.id != 'S0001' THEN '[Staff Dihapus]'
+            ELSE b.name
+        END AS created_by_name
     FROM users as a
-    LEFT JOIN users AS b ON a.created_by = b.id
-    WHERE a.id = ?
+        LEFT JOIN users AS b ON a.created_by = b.id
+    WHERE
+        a.id = ?
     ";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $id);
@@ -158,7 +165,7 @@ if (isset($_GET['id'])) {
                         <h4 class="mb8"><?= formatPhoneNumber($staff['phone_num']) ?></h4>
                         <p class="f12 f-sub">Role</p>
                         <h4 class="mb8"><?= $staff['roles'] ?></h4>
-                        <?php if ($staff['created_by'] !== NULL): ?>
+                        <?php if ($staff['created_by_name'] !== NULL): ?>
                             <p class="f12 f-sub">Didaftarkan oleh</p>
                             <h4 class="mb8"><?= $staff['created_by_name'] ?></h4>
                         <?php endif ?>
