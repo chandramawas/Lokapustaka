@@ -295,7 +295,7 @@ if (isset($_GET['id'])) {
                             <img src="/lokapustaka/img/edit-dark.png" alt="Edit">
                             Edit
                         </a>
-                        <a href="" class="red-b head-b">
+                        <a href="#" onclick="deleteBook('<?= $book['id'] ?>')" class="red-b head-b">
                             <img src="/lokapustaka/img/close-light.png" alt="Hapus">
                             Hapus
                         </a>

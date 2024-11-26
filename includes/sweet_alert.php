@@ -764,4 +764,56 @@
         });
     }
 
+    function deleteBook(id) {
+        Swal.fire({
+            title: 'Hapus ' + id + '?',
+            html: `
+            <input type="password" id="password" class="swal2-input" placeholder="Masukkan password anda untuk konfirmasi">
+        `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            color: '#262626',
+            confirmButtonColor: '#FF0000',
+            customClass: {
+                cancelButton: 'no-color-btn'
+            },
+            preConfirm: () => {
+                const password = document.getElementById('password').value;
+
+                if (!password) {
+                    Swal.showValidationMessage('Password harus diisi!');
+                    return false;
+                }
+
+                return { password };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/lokapustaka/request_handler.php?action=delete_book', {
+                    method: 'POST',
+                    body: JSON.stringify({ password: result.value.password, id: id }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Anggota berhasil dihapus!', '', 'success')
+                                .then(() => {
+                                    window.location.href = '/lokapustaka/pages/books.php';
+                                });
+                        } else {
+                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Gagal', 'Tidak dapat menghapus Buku.', 'error');
+                    });
+            }
+        });
+    }
 </script>

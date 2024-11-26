@@ -58,6 +58,10 @@ switch ($action) {
         handleEditBook($conn);
         break;
 
+    case 'delete_book':
+        handleDeleteBook($conn);
+        break;
+
     default:
         echo '<script>alert("Aksi tidak valid."); window.location.href = "/lokapustaka/pages/dashboard.php"</script>';
 }
@@ -576,4 +580,33 @@ function handleEditBook($conn)
         }
     }
 }
+
+function handleDeleteBook($conn)
+{
+    $data = json_decode(file_get_contents('php://input'), true);
+    $password = $data['password'];
+    $id = $data['id'];
+
+    $stmt = $conn->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+
+        if (password_verify($password, $row['password'])) {
+            $stmt = $conn->prepare('DELETE FROM books WHERE id = ?');
+            $stmt->bind_param('s', $id);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal untuk menghapus buku']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Password Salah']);
+        }
+    }
+}
+
 ?>
