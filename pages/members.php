@@ -23,7 +23,12 @@ if (isset($_GET['id'])) {
                     WHEN loans.return_date IS NULL THEN 1
                     ELSE NULL
                 END
-            ) > 0 THEN MAX(loans.expected_return_date)
+            ) > 0 THEN MAX(
+                CASE
+                    WHEN loans.return_date IS NULL THEN loans.expected_return_date
+                    ELSE NULL
+                END 
+            )
             ELSE '-'
         END AS expected_return_date,
         CASE
@@ -100,33 +105,35 @@ if (isset($_GET['id'])) {
         members.phone_num,
         members.district,
         CASE
-            WHEN loans.expected_return_date IS NULL
-            OR loans.return_date IS NOT NULL THEN '-'
-            ELSE loans.expected_return_date
-        END AS expected_return_date,
-        loans.id AS loan_id,
-        loans.borrow_date,
-        loans.return_date,
-        CASE
-            WHEN loans.id IS NOT NULL
-            AND loans.return_date IS NULL THEN 'Meminjam'
+            WHEN COUNT(loans.id) > 0
+            AND COUNT(
+                CASE
+                    WHEN loans.return_date IS NULL THEN 1
+                    ELSE NULL
+                END
+            ) > 0 THEN 'Meminjam'
             ELSE 'Tidak Meminjam'
-        END AS status
+        END AS status,
+        CASE
+            WHEN COUNT(loans.id) > 0
+            AND COUNT(
+                CASE
+                    WHEN loans.return_date IS NULL THEN 1
+                    ELSE NULL
+                END
+            ) > 0 THEN MAX(
+                CASE
+                    WHEN loans.return_date IS NULL THEN loans.expected_return_date
+                    ELSE NULL
+                END
+            )
+            ELSE '-'
+        END AS expected_return_date
     FROM members
-        LEFT JOIN (
-            SELECT *
-            FROM (
-                    SELECT loans.*, ROW_NUMBER() OVER (
-                            PARTITION BY
-                                member_id
-                            ORDER BY borrow_date DESC
-                        ) AS row_num
-                    FROM loans
-                ) AS ranked_loans
-            WHERE
-                row_num = 1
-        ) AS loans ON members.id = loans.member_id
-    ORDER BY members.id ASC
+        LEFT JOIN loans ON members.id = loans.member_id
+    GROUP BY
+        members.id
+    ORDER BY members.id ASC;
     ";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
@@ -143,34 +150,37 @@ if (isset($_GET['id'])) {
             members.phone_num,
             members.district,
             CASE
-                WHEN loans.expected_return_date IS NULL
-                OR loans.return_date IS NOT NULL THEN '-'
-                ELSE loans.expected_return_date
-            END AS expected_return_date,
-            loans.id AS loan_id,
-            loans.borrow_date,
-            loans.return_date,
-            CASE
-                WHEN loans.id IS NOT NULL
-                AND loans.return_date IS NULL THEN 'Meminjam'
+                WHEN COUNT(loans.id) > 0
+                AND COUNT(
+                    CASE
+                        WHEN loans.return_date IS NULL THEN 1
+                        ELSE NULL
+                    END
+                ) > 0 THEN 'Meminjam'
                 ELSE 'Tidak Meminjam'
-            END AS status
+            END AS status,
+            CASE
+                WHEN COUNT(loans.id) > 0
+                AND COUNT(
+                    CASE
+                        WHEN loans.return_date IS NULL THEN 1
+                        ELSE NULL
+                    END
+                ) > 0 THEN MAX(
+                    CASE
+                        WHEN loans.return_date IS NULL THEN loans.expected_return_date
+                        ELSE NULL
+                    END
+                )
+                ELSE '-'
+            END AS expected_return_date
         FROM members
-            LEFT JOIN (
-                SELECT *
-                FROM (
-                        SELECT loans.*, ROW_NUMBER() OVER (
-                                PARTITION BY
-                                    member_id
-                                ORDER BY borrow_date DESC
-                            ) AS row_num
-                        FROM loans
-                    ) AS ranked_loans
-                WHERE
-                    row_num = 1
-            ) AS loans ON members.id = loans.member_id
-        WHERE MATCH(members.id, members.name) AGAINST(? IN BOOLEAN MODE)
-        ORDER BY members.id ASC
+            LEFT JOIN loans ON members.id = loans.member_id
+        WHERE
+            MATCH(members.id, members.name) AGAINST (? IN BOOLEAN MODE)
+        GROUP BY
+            members.id
+        ORDER BY members.id ASC;
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $search);
