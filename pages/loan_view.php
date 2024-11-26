@@ -43,12 +43,12 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/aside.php";
         <div class="container mb16">
             <img src="/lokapustaka/img/cover-example.png" alt="Sampul" class="mr12">
             <div class="content">
-                <p class="f12 f-sub">Kode Buku</p>
+                <p class="f12 f-sub">Id Buku</p>
                 <h4 class="mb8" onclick="window.location.href='book_view.php';" style="cursor: pointer;">B0001</h4>
                 <p class="f12 f-sub">Judul Buku</p>
                 <h4 class="mb8" onclick="window.location.href='book_vies.php';" style="cursor: pointer;">Koala Kumal
                 </h4>
-                <p class="f12 f-sub">Kode Peminjam</p>
+                <p class="f12 f-sub">Id Peminjam</p>
                 <h4 class="mb8" onclick="window.location.href='member_view.php';" style="cursor: pointer;">A0001</h4>
                 <p class="f12 f-sub">Nama Peminjam</p>
                 <h4 class="mb8" onclick="window.location.href='member_view.php';" style="cursor: pointer;">JohnDoe</h4>

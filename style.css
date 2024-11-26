@@ -64,6 +64,19 @@ aside p {
 /*------------*/
 
 /* Font Weights */
+.f-redir {
+    color: blueviolet;
+}
+
+.f-redir:hover {
+    color: blue;
+    text-decoration: underline;
+}
+
+/*------------*/
+
+
+/* Font Weights */
 .font-regular {
     font-weight: 300;
 }
@@ -342,8 +355,14 @@ input[type=checkbox] {
     box-shadow: var(--shadow);
 }
 
-.container img {
+.container.book {
+    align-items: center;
+    height: fit-content;
+}
+
+.container .cover {
     border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
     width: 200px;
     object-fit: contain;
 }

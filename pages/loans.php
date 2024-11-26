@@ -45,10 +45,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/aside.php";
         <table>
             <thead>
                 <tr>
-                    <th class="w75">id</th>
-                    <th class="w75">Kode Anggota</th>
+                    <th class="w75">Id</th>
+                    <th class="w75">Id Anggota</th>
                     <th>Nama Anggota</th>
-                    <th class="w75">Kode Buku</th>
+                    <th class="w75">Id Buku</th>
                     <th>Judul Buku</th>
                     <th class="w75">Tgl Pinjam</th>
                     <th class="w75">Tenggat Waktu</th>

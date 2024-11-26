@@ -50,6 +50,14 @@ switch ($action) {
         handleDeleteMember($conn);
         break;
 
+    case 'add_book':
+        handleAddBook($conn);
+        break;
+
+    case 'edit_book':
+        handleEditBook($conn);
+        break;
+
     default:
         echo '<script>alert("Aksi tidak valid."); window.location.href = "/lokapustaka/pages/dashboard.php"</script>';
 }
@@ -215,10 +223,12 @@ function handleEditStaff($conn)
     if ($result->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'No Telepon sudah terdaftar!']);
     } else {
-        $stmt = $conn->prepare('UPDATE users SET name = ?, phone_num = ?, roles = ? WHERE id = ?');
-        $stmt->bind_param('ssss', $name, $phone_num, $roles, $id);
-
         if ($stmt->execute()) {
+            if ($id == $_SESSION['users_id']) {
+                $_SESSION['users_name'] = $name;
+                $_SESSION['users_roles'] = $roles;
+            }
+
             echo json_encode(['success' => true, 'id' => $id]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Gagal Mengedit Staff.']);
@@ -445,4 +455,125 @@ function handleDeleteMember($conn)
     }
 }
 
+function handleAddBook($conn)
+{
+    if (count($_FILES) > 0) {
+        if (is_uploaded_file($_FILES['cover']['tmp_name'])) {
+            $cover = file_get_contents($_FILES['cover']['tmp_name']);
+        }
+    }
+
+    $isbn = $_POST['isbn'];
+    $title = $_POST['title'];
+    $category = $_POST['category'];
+    $author = $_POST['author'];
+    $publisher = $_POST['publisher'];
+    $year_published = $_POST['year_published'];
+    $stock = $_POST['stock'];
+    $created_by = $_SESSION['users_id'];
+
+    $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ?');
+    $stmt->bind_param('s', $isbn);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    header('Content-Type: application/json');
+
+    if ($result->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'ISBN sudah terdaftar!']);
+    } else {
+        $sql = "
+        INSERT INTO books (title, isbn, cover, author, category, publisher, year_published, stock, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param(
+            'sssssssis',
+            $title,
+            $isbn,
+            $cover,
+            $author,
+            $category,
+            $publisher,
+            $year_published,
+            $stock,
+            $created_by
+        );
+
+        if ($stmt->execute()) {
+            $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ?');
+            $stmt->bind_param('s', $isbn);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $id = $row['id'];
+
+            echo json_encode(['success' => true, 'id' => $id]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal mendaftarkan buku baru.']);
+        }
+    }
+}
+
+function handleEditBook($conn)
+{
+    if (count($_FILES) > 0) {
+        if (is_uploaded_file($_FILES['cover']['tmp_name'])) {
+            $cover = file_get_contents($_FILES['cover']['tmp_name']);
+        }
+    }
+
+    $id = $_POST['id'];
+    $isbn = $_POST['isbn'];
+    $title = $_POST['title'];
+    $category = $_POST['category'];
+    $author = $_POST['author'];
+    $publisher = $_POST['publisher'];
+    $year_published = $_POST['year_published'];
+    $stock = $_POST['stock'];
+
+    $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ? AND id != ?');
+    $stmt->bind_param('ss', $isbn, $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    header('Content-Type: application/json');
+
+    if ($result->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'ISBN sudah terdaftar!']);
+    } else {
+        $sql = "
+        UPDATE books
+        SET 
+            title = ?,
+            isbn = ?,
+            cover = ?,
+            author = ?,
+            category = ?,
+            publisher = ?,
+            year_published = ?,
+            stock = ?
+        WHERE id = ?;
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param(
+            'sssssssis',
+            $title,
+            $isbn,
+            $cover,
+            $author,
+            $category,
+            $publisher,
+            $year_published,
+            $stock,
+            $id
+        );
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'id' => $id]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal mendaftarkan buku baru.']);
+        }
+    }
+}
 ?>

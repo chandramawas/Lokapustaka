@@ -118,17 +118,17 @@ if (isset($_GET['id'])) {
                     <form id="editStaffForm" method="post">
                         <input type="hidden" name="id" value="<?= $staff['id'] ?>">
                         <div class="input-container2 mb12">
-                            <label for="name" class="f12 f-sub mb4">Nama</label>
+                            <label for="name" class="f12 f-sub mb4">Nama*</label>
                             <input type="text" name="name" id="name" placeholder="e.g. Adul Temon" value="<?= $staff['name'] ?>"
                                 required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="phone_num" class="f12 f-sub mb4">No Telepon</label>
+                            <label for="phone_num" class="f12 f-sub mb4">No Telepon*</label>
                             <input type="text" name="phone_num" id="phone_num" placeholder="e.g. 081234567890"
                                 value="<?= $staff['phone_num'] ?>" required>
                         </div>
                         <div class="input-container2">
-                            <label for="roles" class="f12 f-sub mb4">Role</label><br>
+                            <label for="roles" class="f12 f-sub mb4">Role*</label><br>
                             <select name="roles" id="roles" required>
                                 <option value="Staff" <?= $staff['roles'] === 'Staff' ? 'selected' : '' ?>>Staff</option>
                                 <option value="Admin" <?= $staff['roles'] === 'Admin' ? 'selected' : '' ?>>Admin</option>
@@ -140,7 +140,7 @@ if (isset($_GET['id'])) {
                 <!-- Staff View -->
                 <div class="head mb16">
                     <div class="title">
-                        <p class="f14 f-sub">Kode Staff</p>
+                        <p class="f14 f-sub">Id Staff</p>
                         <h3><?= $staff['id'] ?></h3>
                     </div>
                     <div class="head-button">
@@ -188,15 +188,15 @@ if (isset($_GET['id'])) {
                 <div class="container2">
                     <form id="addStaffForm" method="post">
                         <div class="input-container2 mb12">
-                            <label for="name" class="f12 f-sub mb4">Nama</label>
+                            <label for="name" class="f12 f-sub mb4">Nama*</label>
                             <input type="text" name="name" id="name" placeholder="e.g. Adul Temon" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="phone_num" class="f12 f-sub mb4">No Telepon</label>
+                            <label for="phone_num" class="f12 f-sub mb4">No Telepon*</label>
                             <input type="text" name="phone_num" id="phone_num" placeholder="e.g. 081234567890" required>
                         </div>
                         <div class="input-container2">
-                            <label for="roles" class="f12 f-sub mb4">Role</label><br>
+                            <label for="roles" class="f12 f-sub mb4">Role*</label><br>
                             <select name="roles" id="roles" required>
                                 <option value="Staff">Staff</option>
                                 <option value="Admin">Admin</option>
@@ -210,7 +210,7 @@ if (isset($_GET['id'])) {
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
-                                placeholder="Cari Id atau Nama Staff"
+                                placeholder="Cari Id atau Nama"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                         </form>
                         <a href="staff.php?action=add" class="sec-b head-b">

@@ -80,7 +80,7 @@ if (isset($_GET['id'])) {
             LEFT JOIN books ON book_id = books.id
         WHERE
             member_id = ?
-        ORDER BY loans.id ASC
+        ORDER BY status ASC, loans.id ASC
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $member['id']);
@@ -89,7 +89,7 @@ if (isset($_GET['id'])) {
         $member_loans = $result->fetch_all(MYSQLI_ASSOC);
     } else {
         ?>
-        <script>alert("Member tidak ditemukan."); location.href = "members.php"</script>
+        <script>alert("Anggota tidak ditemukan."); location.href = "members.php"</script>
         <?php
     }
 } else {
@@ -246,52 +246,52 @@ if (isset($_GET['id'])) {
                     <form id="editMemberForm" method="post">
                         <input type="hidden" name="id" value="<?= $member['id'] ?>">
                         <div class="input-container2 mb12">
-                            <label for="name" class="f12 f-sub mb4">Nama</label>
+                            <label for="name" class="f12 f-sub mb4">Nama*</label>
                             <input type="text" name="name" id="name" placeholder="e.g. Adul Temon"
                                 value="<?= $member['name'] ?>" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="phone_num" class="f12 f-sub mb4">No Telepon</label>
+                            <label for="phone_num" class="f12 f-sub mb4">No Telepon*</label>
                             <input type="text" name="phone_num" id="phone_num" placeholder="e.g. 081234567890"
                                 value="<?= $member['phone_num'] ?>" required>
                         </div>
                         <p class="f14 mb12">Alamat</p>
                         <div class="input-container2 mb12">
-                            <label for="street" class="f12 f-sub mb4">Jalan</label>
+                            <label for="street" class="f12 f-sub mb4">Jalan*</label>
                             <input type="text" name="street" id="street" placeholder="e.g. Jl. Fatmawati Raya"
                                 value="<?= $member['street'] ?>" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="home_num" class="f12 f-sub mb4">No Rumah</label>
+                            <label for="home_num" class="f12 f-sub mb4">No Rumah*</label>
                             <input type="text" name="home_num" id="home_num" placeholder="e.g. 24"
                                 value="<?= $member['home_num'] ?>" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="province" class="f12 f-sub mb4">Daerah / Provinsi</label><br>
+                            <label for="province" class="f12 f-sub mb4">Daerah / Provinsi*</label><br>
                             <select name="province" id="province" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="regency_container" style="display: none;">
-                            <label for="regency" class="f12 f-sub mb4">Kabupaten / Kota</label><br>
+                            <label for="regency" class="f12 f-sub mb4">Kabupaten / Kota*</label><br>
                             <select name="regency" id="regency" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="district_container" style="display: none;">
-                            <label for="district" class="f12 f-sub mb4">Kecamatan</label><br>
+                            <label for="district" class="f12 f-sub mb4">Kecamatan*</label><br>
                             <select name="district" id="district" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="village_container" style="display: none;">
-                            <label for="village" class="f12 f-sub mb4">Kelurahan / Desa</label><br>
+                            <label for="village" class="f12 f-sub mb4">Kelurahan / Desa*</label><br>
                             <select name="village" id="village" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2">
-                            <label for="postal_code" class="f12 f-sub mb4">Kode Pos</label>
+                            <label for="postal_code" class="f12 f-sub mb4">Kode Pos*</label>
                             <input type="text" name="postal_code" id="postal_code" placeholder="e.g. 12450"
                                 value="<?= $member['postal_code'] ?>" required>
                         </div>
@@ -300,7 +300,7 @@ if (isset($_GET['id'])) {
             <?php else: ?>
                 <div class="head mb16">
                     <div class="title">
-                        <p class="f14 f-sub">Kode Anggota</p>
+                        <p class="f14 f-sub">Id Anggota</p>
                         <h3><?= $member['id'] ?></h3>
                     </div>
                     <div class="head-button">
@@ -347,15 +347,15 @@ if (isset($_GET['id'])) {
                     <table class="sortable">
                         <thead>
                             <tr>
-                                <th class="w75" data-column="id">
-                                    id
-                                    <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
-                                </th>
-                                <th class="w75" data-column="book_id">Kode Buku</th>
+                                <th class="w75" data-column="id">Id</th>
+                                <th class="w75" data-column="book_id">Id Buku</th>
                                 <th data-column="book_title">Judul Buku</th>
                                 <th class="w75" data-column="borrow_date">Tgl Pinjam</th>
                                 <th class="w75" data-column="expected_return_date">Tenggat Waktu</th>
-                                <th class="w125" data-column="status">Status</th>
+                                <th class="w125" data-column="status">
+                                    Status
+                                    <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
+                                </th>
                                 <th class="w75" data-column="return_date">Tgl Pengembalian</th>
                                 <th class="w125" data-column="fines">Denda</th>
                             </tr>
@@ -404,48 +404,48 @@ if (isset($_GET['id'])) {
                 <div class="container2">
                     <form id="addMemberForm" method="post">
                         <div class="input-container2 mb12">
-                            <label for="name" class="f12 f-sub mb4">Nama</label>
+                            <label for="name" class="f12 f-sub mb4">Nama*</label>
                             <input type="text" name="name" id="name" placeholder="e.g. Adul Temon" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="phone_num" class="f12 f-sub mb4">No Telepon</label>
+                            <label for="phone_num" class="f12 f-sub mb4">No Telepon*</label>
                             <input type="text" name="phone_num" id="phone_num" placeholder="e.g. 081234567890" required>
                         </div>
                         <p class="f14 mb12">Alamat</p>
                         <div class="input-container2 mb12">
-                            <label for="street" class="f12 f-sub mb4">Jalan</label>
+                            <label for="street" class="f12 f-sub mb4">Jalan*</label>
                             <input type="text" name="street" id="street" placeholder="e.g. Jl. Fatmawati Raya" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="home_num" class="f12 f-sub mb4">No Rumah</label>
+                            <label for="home_num" class="f12 f-sub mb4">No Rumah*</label>
                             <input type="text" name="home_num" id="home_num" placeholder="e.g. 24" required>
                         </div>
                         <div class="input-container2 mb12">
-                            <label for="province" class="f12 f-sub mb4">Daerah / Provinsi</label><br>
+                            <label for="province" class="f12 f-sub mb4">Daerah / Provinsi*</label><br>
                             <select name="province" id="province" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="regency_container" style="display: none;">
-                            <label for="regency" class="f12 f-sub mb4">Kabupaten / Kota</label><br>
+                            <label for="regency" class="f12 f-sub mb4">Kabupaten / Kota*</label><br>
                             <select name="regency" id="regency" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="district_container" style="display: none;">
-                            <label for="district" class="f12 f-sub mb4">Kecamatan</label><br>
+                            <label for="district" class="f12 f-sub mb4">Kecamatan*</label><br>
                             <select name="district" id="district" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2 mb12" id="village_container" style="display: none;">
-                            <label for="village" class="f12 f-sub mb4">Kelurahan / Desa</label><br>
+                            <label for="village" class="f12 f-sub mb4">Kelurahan / Desa*</label><br>
                             <select name="village" id="village" required>
                                 <option value="" disabled selected>Pilih...</option>
                             </select>
                         </div>
                         <div class="input-container2">
-                            <label for="postal_code" class="f12 f-sub mb4">Kode Pos</label>
+                            <label for="postal_code" class="f12 f-sub mb4">Kode Pos*</label>
                             <input type="text" name="postal_code" id="postal_code" placeholder="e.g. 12450" required>
                         </div>
                     </form>
@@ -456,7 +456,7 @@ if (isset($_GET['id'])) {
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
-                                placeholder="Cari Id atau Nama Anggota"
+                                placeholder="Cari Id atau Nama"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                         </form>
                         <a href="members.php?action=add" class="sec-b head-b">
@@ -471,7 +471,7 @@ if (isset($_GET['id'])) {
                             <thead>
                                 <tr>
                                     <th class="w75" data-column="id">
-                                        Kode
+                                        Id
                                         <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                     </th>
                                     <th data-column="name">Nama</th>
@@ -505,7 +505,7 @@ if (isset($_GET['id'])) {
                         <thead>
                             <tr>
                                 <th class="w75" data-column="id">
-                                    Kode
+                                    Id
                                     <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                 </th>
                                 <th data-column="name">Nama</th>

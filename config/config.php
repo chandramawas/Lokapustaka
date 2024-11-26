@@ -32,3 +32,8 @@ function formatDate($datetime)
     // Convert 2024/11/23 20:42:00 to 23/11/2024
     return date('d/m/Y', strtotime($datetime));
 }
+
+function formatISBN($isbn)
+{
+    return preg_replace('/(\d{3})(\d{7})/', '$1-$2', $isbn);
+}

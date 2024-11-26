@@ -595,4 +595,173 @@
             }
         });
     }
+
+    function confirmAddBook() {
+        const form = document.getElementById('addBookForm');
+
+        if (!form.checkValidity()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Form Tidak Valid!',
+                text: 'Harap lengkapi semua data sebelum melanjutkan.',
+                confirmButtonText: 'OK',
+                color: '#262626',
+                customClass: {
+                    confirmButton: 'pri-color-btn'
+                }
+            });
+            return; // Stop further execution
+        }
+
+        Swal.fire({
+            title: 'Tambah Buku?',
+            text: "Apakah anda yakin ingin menambahkan buku baru?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Prevent default form submission
+                const formData = new FormData(form);
+
+                // Submit the form data via fetch
+                fetch('/lokapustaka/request_handler.php?action=add_book', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        // Handle success or error from the server
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Buku baru berhasil ditambahkan.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            }).then(() => {
+                                window.location.href = `/lokapustaka/pages/books.php?id=${result.id}`;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: result.message || 'Terjadi kesalahan saat menambahkan buku.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghubungi server.',
+                            confirmButtonText: 'OK',
+                            color: '#262626',
+                            customClass: {
+                                confirmButton: 'pri-color-btn'
+                            }
+                        });
+                    });
+            }
+        });
+    }
+
+    function confirmEditBook() {
+        const form = document.getElementById('editBookForm');
+
+        if (!form.checkValidity()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Form Tidak Valid!',
+                text: 'Harap lengkapi semua data sebelum melanjutkan.',
+                confirmButtonText: 'OK',
+                color: '#262626',
+                customClass: {
+                    confirmButton: 'pri-color-btn'
+                }
+            });
+            return; // Stop further execution
+        }
+
+        Swal.fire({
+            title: 'Edit Buku?',
+            text: "Apakah anda yakin ingin mengedit buku ini?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Prevent default form submission
+                const formData = new FormData(form);
+
+                // Submit the form data via fetch
+                fetch('/lokapustaka/request_handler.php?action=edit_book', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        // Handle success or error from the server
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Buku berhasil diedit.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            }).then(() => {
+                                window.location.href = `/lokapustaka/pages/books.php?id=${result.id}`;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: result.message || 'Terjadi kesalahan saat mengedit buku.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghubungi server.',
+                            confirmButtonText: 'OK',
+                            color: '#262626',
+                            customClass: {
+                                confirmButton: 'pri-color-btn'
+                            }
+                        });
+                    });
+            }
+        });
+    }
+
 </script>
