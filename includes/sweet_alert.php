@@ -1,3 +1,7 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
+?>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -526,8 +530,6 @@
                     })
                     .catch(error => {
                         // Handle fetch errors
-                        console.log(error);
-
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal!',
@@ -591,6 +593,47 @@
                     .catch(error => {
                         console.error('Error:', error);
                         Swal.fire('Gagal', 'Tidak dapat menghapus anggota.', 'error');
+                    });
+            }
+        });
+    }
+
+    function extendMember(id) {
+        Swal.fire({
+            title: 'Perpanjang Keanggotan ' + id + '?',
+            text: 'Keanggotaan akan diperpanjang selama ' + '<?= EXPIRED_DATE_TEXT ?>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/lokapustaka/request_handler.php?action=extend_member', {
+                    method: 'POST',
+                    body: JSON.stringify({ id }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Keanggotaan ' + data.id + ' berhasil diperpanjang!', 'Masa aktif sampai ' + data.expired_date, 'success')
+                                .then(() => {
+                                    window.location.href = '/lokapustaka/pages/members.php?id=' + data.id;
+                                });
+                        } else {
+                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Gagal', 'Tidak dapat memperpanjang anggota.', 'error');
                     });
             }
         });

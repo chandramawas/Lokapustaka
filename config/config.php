@@ -1,14 +1,23 @@
 <?php
 
-define('APP', 'Lokapustaka');
-
 //Database Credentials
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', 'root');
 define('DB_NAME', 'lokapustaka');
 
-define('DEFAULT_PASS', 'lokapustaka2024');
+//Web Info
+define('APP', 'Lokapustaka');
+
+//Acounts
+define('DEFAULT_PASS', 'Lokapustaka2024'); //Password default untuk staff baru
+
+//Rules
+define('EXPIRED_DATE', '3 MONTH'); //Keanggotaan kadaluarsa
+define('EXPIRED_DATE_TEXT', '3 bulan'); //Keanggotaan kadaluarsa
+define('EXPECTED_RETURN_DATE', '7 DAY'); //Batas waktu peminjaman
+define('EXPECTED_RETURN_DATE_TEXT', '7 hari'); //Batas waktu peminjaman
+define('FINES', '50000'); //Denda keterlambatan per hari
 
 
 // Set timezone to WIB

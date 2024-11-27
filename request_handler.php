@@ -1,4 +1,5 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/db.php";
 
 // Cek apakah parameter 'action' ada
@@ -48,6 +49,10 @@ switch ($action) {
 
     case 'delete_member':
         handleDeleteMember($conn);
+        break;
+
+    case 'extend_member':
+        handleExtendMember($conn);
         break;
 
     case 'add_book':
@@ -219,7 +224,7 @@ function handleEditStaff($conn)
     $phone_num = $data['phone_num'];
     $roles = $data['roles'];
 
-    $stmt = $conn->prepare('SELECT * FROM users WHERE phone_num = ? AND id != ?');
+    $stmt = $conn->prepare('SELECT id FROM users WHERE phone_num = ? AND id != ?');
     $stmt->bind_param('ss', $phone_num, $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -227,8 +232,12 @@ function handleEditStaff($conn)
     if ($result->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'No Telepon sudah terdaftar!']);
     } else {
+        $sql = "UPDATE users SET name = ?, phone_num = ?, roles = ? WHERE  id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ssss', $name, $phone_num, $roles, $id);
+
         if ($stmt->execute()) {
-            if ($id == $_SESSION['users_id']) {
+            if ($id === $_SESSION['users_id']) {
                 $_SESSION['users_name'] = $name;
                 $_SESSION['users_roles'] = $roles;
             }
@@ -326,8 +335,8 @@ function handleAddMember($conn)
     } else {
         // Insert new staff into the database
         $sql = "
-        INSERT INTO members (name, phone_num, street, home_num, province, regency, district, village, postal_code, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO members (name, phone_num, street, home_num, province, regency, district, village, postal_code, created_by, expired_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL " . EXPIRED_DATE . "))
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
@@ -456,6 +465,32 @@ function handleDeleteMember($conn)
         } else {
             echo json_encode(['success' => false, 'message' => 'Password Salah']);
         }
+    }
+}
+
+function handleExtendMember($conn)
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'];
+
+    $sql = "UPDATE members SET expired_date = DATE_ADD(NOW(), INTERVAL " . EXPIRED_DATE . ") WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $id);
+
+    if ($stmt->execute()) {
+        $sql = "SELECT expired_date FROM members WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $expired_date = formatDate($row['expired_date']);
+
+        echo json_encode(['success' => true, 'id' => $id, 'expired_date' => $expired_date]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Gagal Memperpanjang Anggota.']);
     }
 }
 

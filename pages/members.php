@@ -8,7 +8,21 @@ if (isset($_GET['id'])) {
 
     $sql = "
     SELECT
-        members.*,
+        members.id,
+        members.name,
+        CASE
+            WHEN expired_date > NOW() THEN 'Aktif'
+            ELSE 'Kadaluarsa'
+        END status,
+        members.expired_date,
+        members.phone_num,
+        members.street,
+        members.home_num,
+        members.village,
+        members.district,
+        members.regency,
+        members.province,
+        members.postal_code,
         COUNT(loans.id) AS total_loans,
         COUNT(
             CASE
@@ -17,34 +31,10 @@ if (isset($_GET['id'])) {
             END
         ) AS late_loans,
         CASE
-            WHEN COUNT(loans.id) > 0
-            AND COUNT(
-                CASE
-                    WHEN loans.return_date IS NULL THEN 1
-                    ELSE NULL
-                END
-            ) > 0 THEN MAX(
-                CASE
-                    WHEN loans.return_date IS NULL THEN loans.expected_return_date
-                    ELSE NULL
-                END 
-            )
-            ELSE '-'
-        END AS expected_return_date,
-        CASE
-            WHEN COUNT(loans.id) > 0
-            AND COUNT(
-                CASE
-                    WHEN loans.return_date IS NULL THEN 1
-                    ELSE NULL
-                END
-            ) > 0 THEN 'Meminjam'
-            ELSE 'Tidak Meminjam'
-        END AS status,
-        CASE
             WHEN members.created_by IS NULL THEN '[Staff Dihapus]'
             ELSE users.name
-        END AS created_by_name
+        END AS created_by_name,
+        members.created_at
     FROM members
         LEFT JOIN loans ON members.id = loans.member_id
         LEFT JOIN users ON members.created_by = users.id
@@ -52,7 +42,7 @@ if (isset($_GET['id'])) {
         members.id = ?
     GROUP BY
         members.id;
-    ";
+        ";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $id);
     $stmt->execute();
@@ -98,43 +88,28 @@ if (isset($_GET['id'])) {
         <?php
     }
 } else {
+    $excludeExpired = isset($_GET['exclude_expired']) ? 1 : 0;
+
     $sql = "
     SELECT
-        members.id,
-        members.name,
-        members.phone_num,
-        members.district,
+        id,
+        name,
+        phone_num,
+        district,
         CASE
-            WHEN COUNT(loans.id) > 0
-            AND COUNT(
-                CASE
-                    WHEN loans.return_date IS NULL THEN 1
-                    ELSE NULL
-                END
-            ) > 0 THEN 'Meminjam'
-            ELSE 'Tidak Meminjam'
-        END AS status,
-        CASE
-            WHEN COUNT(loans.id) > 0
-            AND COUNT(
-                CASE
-                    WHEN loans.return_date IS NULL THEN 1
-                    ELSE NULL
-                END
-            ) > 0 THEN MAX(
-                CASE
-                    WHEN loans.return_date IS NULL THEN loans.expected_return_date
-                    ELSE NULL
-                END
-            )
-            ELSE '-'
-        END AS expected_return_date
+            WHEN expired_date > NOW() THEN 'Aktif'
+            ELSE 'Kadaluarsa'
+        END status,
+        expired_date
     FROM members
-        LEFT JOIN loans ON members.id = loans.member_id
-    GROUP BY
-        members.id
-    ORDER BY members.id ASC;
     ";
+
+    if ($excludeExpired) {
+        $sql .= " WHERE expired_date > NOW()";
+    }
+
+    $sql .= " GROUP BY id ORDER BY id ASC;";
+
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -145,43 +120,26 @@ if (isset($_GET['id'])) {
 
         $sql = "
         SELECT
-            members.id,
-            members.name,
-            members.phone_num,
-            members.district,
+            id,
+            name,
+            phone_num,
+            district,
             CASE
-                WHEN COUNT(loans.id) > 0
-                AND COUNT(
-                    CASE
-                        WHEN loans.return_date IS NULL THEN 1
-                        ELSE NULL
-                    END
-                ) > 0 THEN 'Meminjam'
-                ELSE 'Tidak Meminjam'
-            END AS status,
-            CASE
-                WHEN COUNT(loans.id) > 0
-                AND COUNT(
-                    CASE
-                        WHEN loans.return_date IS NULL THEN 1
-                        ELSE NULL
-                    END
-                ) > 0 THEN MAX(
-                    CASE
-                        WHEN loans.return_date IS NULL THEN loans.expected_return_date
-                        ELSE NULL
-                    END
-                )
-                ELSE '-'
-            END AS expected_return_date
+                WHEN expired_date > NOW() THEN 'Aktif'
+                ELSE 'Kadaluarsa'
+            END status,
+            expired_date
         FROM members
-            LEFT JOIN loans ON members.id = loans.member_id
         WHERE
-            MATCH(members.id, members.name) AGAINST (? IN BOOLEAN MODE)
-        GROUP BY
-            members.id
-        ORDER BY members.id ASC;
+            MATCH(id, name) AGAINST (? IN BOOLEAN MODE)
         ";
+
+        if ($excludeExpired) {
+            $sql .= " AND expired_date > NOW()";
+        }
+
+        $sql .= " GROUP BY id ORDER BY id ASC;";
+
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $search);
         $stmt->execute();
@@ -314,13 +272,14 @@ if (isset($_GET['id'])) {
                         <h3><?= $member['id'] ?></h3>
                     </div>
                     <div class="head-button">
+                        <a href="#" onclick="deleteMember('<?= $member['id'] ?>')" class="fou-b head-b mr8">Hapus</a>
                         <a href="?id=<?= $member['id'] ?>&action=edit" class="thi-b head-b mr8">
                             <img src="/lokapustaka/img/edit-dark.png" alt="Edit">
                             Edit
                         </a>
-                        <a href="#" onclick="deleteMember('<?= $member['id'] ?>')" class="red-b head-b">
-                            <img src="/lokapustaka/img/close-light.png" alt="Hapus">
-                            Hapus
+                        <a href="#" onclick="extendMember('<?= $member['id'] ?>')" class="sec-b head-b">
+                            <img src="/lokapustaka/img/plus-light.png" alt="Perpanjang">
+                            Perpanjang
                         </a>
                     </div>
                 </div>
@@ -328,6 +287,10 @@ if (isset($_GET['id'])) {
                     <div class="content">
                         <p class="f12 f-sub">Nama</p>
                         <h4 class="mb8"><?= $member['name'] ?></h4>
+                        <p class="f12 f-sub">Status Keanggotaan</p>
+                        <h4 class="mb8"><?= $member['status'] ?></h4>
+                        <p class="f12 f-sub">Masa Aktif Keanggotaan</p>
+                        <h4 class="mb8"><?= formatDate($member['expired_date']) ?></h4>
                         <p class="f12 f-sub">No Handphone</p>
                         <h4 class="mb8"><?= formatPhoneNumber($member['phone_num']) ?></h4>
                         <p class="f12 f-sub">Alamat Lengkap</p>
@@ -336,20 +299,14 @@ if (isset($_GET['id'])) {
                             <?= $member['district'] ?>, <?= $member['regency'] ?>, <?= $member['province'] ?>,
                             <?= $member['postal_code'] ?>
                         </h4>
-                        <p class="f12 f-sub">Tanggal Daftar</p>
-                        <h4 class="mb8"><?= formatDate($member['created_at']) ?></h4>
                         <p class="f12 f-sub">Total Peminjaman</p>
                         <h4 class="mb8"><?= $member['total_loans'] ?> Peminjaman</h4>
                         <p class="f12 f-sub">Peminjaman yang Telat Dikembalikan</p>
                         <h4 class="mb8"><?= $member['late_loans'] ?> Peminjaman</h4>
-                        <p class="f12 f-sub">Status Terkini</p>
-                        <h4 class="mb8"><?= $member['status'] ?></h4>
-                        <p class="f12 f-sub">Tenggat Waktu</p>
-                        <h4 class="mb8">
-                            <?= ($member['expected_return_date'] !== '-') ? formatDate($member['expected_return_date']) : $member['expected_return_date'] ?>
-                        </h4>
                         <p class="f12 f-sub">Didaftarkan oleh</p>
-                        <h4><?= $member['created_by_name'] ?></h4>
+                        <h4 class="mb8"><?= $member['created_by_name'] ?></h4>
+                        <p class="f12 f-sub">Tanggal Daftar</p>
+                        <h4><?= formatDate($member['created_at']) ?></h4>
                     </div>
                 </div>
                 <p class="f-sub mb8">Riwayat Peminjaman</p>
@@ -462,12 +419,27 @@ if (isset($_GET['id'])) {
                 </div><br>
             <?php else: ?>
                 <div class="head mb16">
-                    <h3>Daftar Anggota</h3>
+                    <div class="title">
+                        <h3 class="mb4">Daftar Anggota</h3>
+                        <span class="subtitle">
+                            <form id="excludeExpiredForm" action="" method="get">
+                                <?php if (!empty($_GET['search'])): ?>
+                                    <input type="hidden" name="search" value="<?= htmlspecialchars($_GET['search']) ?>">
+                                <?php endif ?>
+                                <input type="checkbox" name="exclude_expired" id="exclude_expired" class="f12 mr4" <?php echo $excludeExpired ? 'checked' : ''; ?>
+                                    onchange="document.getElementById('excludeExpiredForm').submit()">
+                            </form>
+                            <label for="exclude_expired" class="f-sub f12">Kecualikan Kadaluarsa</label>
+                        </span>
+                    </div>
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
                                 placeholder="Cari Id atau Nama"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                            <?php if (isset($_GET['exclude_expired'])): ?>
+                                <input type="hidden" name="exclude_expired" value="<?= $_GET['exclude_expired'] ?>">
+                            <?php endif; ?>
                         </form>
                         <a href="members.php?action=add" class="sec-b head-b">
                             <img src="/lokapustaka/img/plus-light.png" alt="Tambah">
@@ -488,7 +460,7 @@ if (isset($_GET['id'])) {
                                     <th class="w125" data-column="phone_num">No Handphone</th>
                                     <th class="w150" data-column="district">Wilayah</th>
                                     <th class="w125" data-column="status">Status</th>
-                                    <th class="w75" data-column="expected_return_date">Tenggat Waktu</th>
+                                    <th class="w125" data-column="expired_date">Kadaluarsa</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -500,9 +472,7 @@ if (isset($_GET['id'])) {
                                         <td><?= formatPhoneNumber($searchedMember['phone_num']) ?></td>
                                         <td><?= $searchedMember['district'] ?></td>
                                         <td class="t-center"><?= $searchedMember['status'] ?></td>
-                                        <td class="t-center">
-                                            <?= ($searchedMember['expected_return_date'] !== '-') ? formatDate($searchedMember['expected_return_date']) : $searchedMember['expected_return_date'] ?>
-                                        </td>
+                                        <td class="t-center"><?= formatDate($searchedMember['expired_date']) ?></td>
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
@@ -521,8 +491,8 @@ if (isset($_GET['id'])) {
                                 <th data-column="name">Nama</th>
                                 <th class="w125" data-column="phone_num">No Handphone</th>
                                 <th class="w150" data-column="district">Wilayah</th>
-                                <th class="w125" data-column="status">Status</th>
-                                <th class="w75" data-column="expected_return_date">Tenggat Waktu</th>
+                                <th class="w75" data-column="status">Status</th>
+                                <th class="w125" data-column="expired_date">Kadaluarsa</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -533,9 +503,7 @@ if (isset($_GET['id'])) {
                                     <td><?= formatPhoneNumber($member['phone_num']) ?></td>
                                     <td><?= $member['district'] ?></td>
                                     <td class="t-center"><?= $member['status'] ?></td>
-                                    <td class="t-center">
-                                        <?= ($member['expected_return_date'] !== '-') ? formatDate($member['expected_return_date']) : $member['expected_return_date'] ?>
-                                    </td>
+                                    <td class="t-center"><?= formatDate($member['expired_date']) ?></td>
                                 </tr>
                             <?php endforeach ?>
                         </tbody>
