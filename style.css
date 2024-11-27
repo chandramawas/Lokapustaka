@@ -437,6 +437,7 @@ button.exit:hover {
 
 .subtitle {
     display: flex;
+    align-items: center;
 }
 
 /*-----------*/

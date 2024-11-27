@@ -84,36 +84,60 @@ if (isset($_GET['id'])) {
         <?php
     }
 } else {
+    $selectedCategory = $_GET['category'] ?? '';
+    $params = [];
+
     $sql = "
-    SELECT
-        books.id,
-        books.title,
-        books.author,
-        books.category,
-        COUNT(
-            CASE
-                WHEN loans.book_id IS NOT NULL
-                AND return_date IS NULL THEN 1
-            END
-        ) AS borrow,
-        (
-            books.stock - COUNT(
+        SELECT
+            books.id,
+            books.title,
+            books.author,
+            books.category,
+            COUNT(
                 CASE
                     WHEN loans.book_id IS NOT NULL
                     AND loans.return_date IS NULL THEN 1
                 END
-            )
-        ) AS available_stock
-    FROM books
+            ) AS borrow,
+            (
+                books.stock - COUNT(
+                    CASE
+                        WHEN loans.book_id IS NOT NULL
+                        AND loans.return_date IS NULL THEN 1
+                    END
+                )
+            ) AS available_stock
+        FROM books
         LEFT JOIN loans ON loans.book_id = books.id
-    GROUP BY
-        books.id
-    ORDER BY books.id ASC
     ";
+
+    // Add WHERE clause if a category is selected
+    if ($selectedCategory) {
+        $sql .= " WHERE books.category = ?";
+        $params[] = $selectedCategory;
+    }
+
+    // Append GROUP BY and ORDER BY clauses
+    $sql .= "
+        GROUP BY books.id
+        ORDER BY books.id ASC
+    ";
+
     $stmt = $conn->prepare($sql);
+
+    if (!empty($params)) {
+        $stmt->bind_param("s", ...$params);
+    }
+
     $stmt->execute();
     $result = $stmt->get_result();
     $books = $result->fetch_all(MYSQLI_ASSOC);
+
+    $sql = "SELECT category FROM books GROUP BY category ORDER BY category ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $categories = $result->fetch_all(MYSQLI_ASSOC);
 
     if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
         $search = trim($_GET['search']) . '*';
@@ -437,7 +461,23 @@ if (isset($_GET['id'])) {
                 </div><br>
             <?php else: ?>
                 <div class="head mb16">
-                    <h3>Daftar Buku</h3>
+                    <div class="title">
+                        <h3 class="mb4">Daftar Buku</h3>
+                        <span class="subtitle">
+                            <label for="category" class="f-sub f12 mr4">Pencarian Berdasarkan Kategori:</label>
+                            <form id="categoryForm" method="GET" action="">
+                                <select name="category" id="category" class="f12"
+                                    onchange="document.getElementById('categoryForm').submit()">
+                                    <option value="">Semua Kategori</option>
+                                    <?php foreach ($categories as $category): ?>
+                                        <option value="<?= htmlspecialchars($category['category']) ?>" <?= isset($_GET['category']) && $_GET['category'] == $category['category'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($category['category']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
+                        </span>
+                    </div>
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
