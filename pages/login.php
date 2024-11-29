@@ -19,12 +19,14 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/db.php";
 <body class="p0">
     <div class="center">
         <div class="login-container">
-            <img src="/lokapustaka/img/logo.png" class="logo mb16">
-            <p class="font-bold mb12 t-center">Staff Login</p>
+            <div class="logo login mb8">
+                <img src="/lokapustaka/img/icon.png" class="mr8">
+            </div>
+            <p class="font-bold t-center mb16">Staff Login</p>
             <form action="/lokapustaka/request_handler.php?action=login" method="post">
                 <div class="input-container mb12">
                     <img src="/lokapustaka/img/staff-dark.png" alt="Staff Icon" class="icon">
-                    <input type="text" name="id" id="id" placeholder="Staff Id" required>
+                    <input type="text" name="id" id="id" placeholder="ID Staff" required>
                 </div>
                 <div class="input-container mb12">
                     <img src="/lokapustaka/img/password-dark.png" alt="Password Icon" class="icon">

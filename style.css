@@ -46,6 +46,16 @@ aside p {
 
 .logo {
     width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo.login {
+    justify-content: center;
+}
+
+.logo img {
+    width: 50px;
 }
 
 /* Font Color */
@@ -334,10 +344,11 @@ input[type=checkbox] {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    width: 100%;
 }
 
 .login-container {
-    width: 100%;
+    width: 50%;
     max-width: 400px;
     background-color: var(--c-50);
     border-radius: 12px;
@@ -356,15 +367,12 @@ input[type=checkbox] {
 }
 
 .container.book {
-    align-items: center;
     height: fit-content;
 }
 
 .container .cover {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-radius: 8px;
     width: 200px;
-    object-fit: contain;
 }
 
 .container2 {
@@ -498,6 +506,10 @@ tbody tr:last-of-type {
 
 .w75 {
     width: 75px;
+}
+
+.w100 {
+    width: 100px;
 }
 
 .w125 {

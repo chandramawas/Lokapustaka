@@ -140,7 +140,7 @@ if (isset($_GET['id'])) {
                 <!-- Staff View -->
                 <div class="head mb16">
                     <div class="title">
-                        <p class="f14 f-sub">Id Staff</p>
+                        <p class="f14 f-sub">ID Staff</p>
                         <h3><?= $staff['id'] ?></h3>
                     </div>
                     <div class="head-button">
@@ -210,7 +210,7 @@ if (isset($_GET['id'])) {
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
-                                placeholder="Cari Id atau Nama"
+                                placeholder="Cari ID atau Nama"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                         </form>
                         <a href="staff.php?action=add" class="sec-b head-b">
@@ -225,7 +225,7 @@ if (isset($_GET['id'])) {
                             <thead>
                                 <tr>
                                     <th class="w75" data-column="id">
-                                        Id
+                                        ID
                                         <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                     </th>
                                     <th data-column="name">
@@ -258,7 +258,7 @@ if (isset($_GET['id'])) {
                         <thead>
                             <tr>
                                 <th class="w75" data-column="id">
-                                    Id
+                                    ID
                                     <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                 </th>
                                 <th data-column="name">

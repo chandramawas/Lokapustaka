@@ -3,7 +3,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
 ?>
 
 <aside class="mr16">
-    <img src="/lokapustaka/img/logo.png" class="logo mb16">
+    <div class="logo mb16">
+        <img src="/lokapustaka/img/icon.png">
+    </div>
     <p class="font-medium">[<?= $_SESSION['users_roles'] ?>]</p>
     <p class="font-bold"><?= $_SESSION['users_name'] ?></p>
     <p class="font-medium mb16"><?= $_SESSION['users_id'] ?></p>

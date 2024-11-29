@@ -13,14 +13,7 @@ if (isset($_GET['id'])) {
         books.title,
         books.author,
         books.category,
-        (
-            books.stock - COUNT(
-                CASE
-                    WHEN loans.book_id IS NOT NULL
-                    AND loans.return_date IS NULL THEN 1
-                END
-            )
-        ) AS available_stock,
+        books.available_stock,
         COUNT(
             CASE
                 WHEN loans.book_id IS NOT NULL
@@ -99,14 +92,7 @@ if (isset($_GET['id'])) {
                     AND loans.return_date IS NULL THEN 1
                 END
             ) AS borrow,
-            (
-                books.stock - COUNT(
-                    CASE
-                        WHEN loans.book_id IS NOT NULL
-                        AND loans.return_date IS NULL THEN 1
-                    END
-                )
-            ) AS available_stock
+            books.available_stock
         FROM books
         LEFT JOIN loans ON loans.book_id = books.id
     ";
@@ -154,18 +140,11 @@ if (isset($_GET['id'])) {
                     AND return_date IS NULL THEN 1
                 END
             ) AS borrow,
-            (
-                books.stock - COUNT(
-                    CASE
-                        WHEN loans.book_id IS NOT NULL
-                        AND loans.return_date IS NULL THEN 1
-                    END
-                )
-            ) AS available_stock
+            books.available_stock
         FROM books
             LEFT JOIN loans ON loans.book_id = books.id
         WHERE
-            MATCH(books.id, books.title, books.author) AGAINST(? IN BOOLEAN MODE)
+            MATCH(books.id, books.title, books.isbn) AGAINST(? IN BOOLEAN MODE)
         GROUP BY
             books.id
         ORDER BY books.id ASC
@@ -311,7 +290,7 @@ if (isset($_GET['id'])) {
             <?php else: ?>
                 <div class="head mb16">
                     <div class="title">
-                        <p class="f14 f-sub">Id Buku</p>
+                        <p class="f14 f-sub">ID Buku</p>
                         <h3><?= $book['id'] ?></h3>
                     </div>
                     <div class="head-button">
@@ -365,7 +344,7 @@ if (isset($_GET['id'])) {
                                     <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                 </th>
                                 <th class="w75" data-column="return_date">Tgl Pengembalian</th>
-                                <th class="w75" data-column="fines">Denda</th>
+                                <th class="w100" data-column="fines">Denda</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -481,7 +460,7 @@ if (isset($_GET['id'])) {
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
-                                placeholder="Cari Id, Judul, Pengarang"
+                                placeholder="Cari ID, ISBN, Judul"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                         </form>
                         <a href="?action=add" class="sec-b head-b">
@@ -496,7 +475,7 @@ if (isset($_GET['id'])) {
                             <thead>
                                 <tr>
                                     <th class="w75" data-column="id">
-                                        Id
+                                        ID
                                         <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                     </th>
                                     <th data-column="title">Judul</th>
@@ -527,7 +506,7 @@ if (isset($_GET['id'])) {
                         <thead>
                             <tr>
                                 <th class="w75" data-column="id">
-                                    Id
+                                    ID
                                     <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                 </th>
                                 <th data-column="title">Judul</th>

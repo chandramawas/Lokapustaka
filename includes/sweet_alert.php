@@ -859,4 +859,319 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
             }
         });
     }
+
+    function confirmAddLoan() {
+        const form = document.getElementById('addLoanForm');
+
+        if (!form.checkValidity()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Form Tidak Valid!',
+                text: 'Harap lengkapi semua data sebelum melanjutkan.',
+                confirmButtonText: 'OK',
+                color: '#262626',
+                customClass: {
+                    confirmButton: 'pri-color-btn'
+                }
+            });
+            return; // Stop further execution
+        }
+
+        Swal.fire({
+            title: 'Tambah Peminjaman?',
+            text: "Apakah Anda yakin ingin menambahkan peminjaman baru?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Get form data
+                const formData = new FormData(form);
+
+                // Convert form data to a plain object
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                // Send the form data as JSON via fetch
+                fetch('/lokapustaka/request_handler.php?action=add_loan', {
+                    method: 'POST',
+                    body: JSON.stringify(data), // Send data as JSON
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle success or error from the server
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil Menambahkan Peminjaman!',
+                                text: 'Dengan tenggat waktu sampai ' + data.expected_return_date,
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            }).then(() => {
+                                window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: data.message || 'Terjadi kesalahan saat menambahkan peminjaman.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Handle fetch errors
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghubungi server.',
+                            confirmButtonText: 'OK',
+                            color: '#262626',
+                            customClass: {
+                                confirmButton: 'pri-color-btn'
+                            }
+                        });
+                    });
+            }
+        });
+    }
+
+    function deleteLoan(id) {
+        Swal.fire({
+            title: 'Hapus ' + id + '?',
+            html: `
+            <input type="password" id="password" class="swal2-input" placeholder="Masukkan password anda untuk konfirmasi">
+        `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            color: '#262626',
+            confirmButtonColor: '#FF0000',
+            customClass: {
+                cancelButton: 'no-color-btn'
+            },
+            preConfirm: () => {
+                const password = document.getElementById('password').value;
+
+                if (!password) {
+                    Swal.showValidationMessage('Password harus diisi!');
+                    return false;
+                }
+
+                return { password };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/lokapustaka/request_handler.php?action=delete_loan', {
+                    method: 'POST',
+                    body: JSON.stringify({ password: result.value.password, id: id }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Peminjaman berhasil dihapus!', '', 'success')
+                                .then(() => {
+                                    window.location.href = '/lokapustaka/pages/loans.php';
+                                });
+                        } else {
+                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Gagal', 'Tidak dapat menghapus Peminjaman.', 'error');
+                    });
+            }
+        });
+    }
+
+    function extendLoan(id) {
+        Swal.fire({
+            title: 'Perpanjang Peminjaman ' + id + '?',
+            text: 'Peminjaman akan diperpanjang selama ' + '<?= EXPECTED_RETURN_DATE_TEXT ?>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/lokapustaka/request_handler.php?action=extend_loan', {
+                    method: 'POST',
+                    body: JSON.stringify({ id }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Peminjaman ' + data.id + ' berhasil diperpanjang!', 'Tenggat Waktu sampai ' + data.expected_return_date, 'success')
+                                .then(() => {
+                                    window.location.href = '/lokapustaka/pages/loans.php?id=' + data.id;
+                                });
+                        } else {
+                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Gagal', 'Kesalahan saat menghubungkan dengan server.', 'error');
+                    });
+            }
+        });
+    }
+
+    function returnLoan(id) {
+        Swal.fire({
+            title: 'Peminjaman ' + id + ' Dikembalikan?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Iya',
+            cancelButtonText: 'Tidak',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/lokapustaka/request_handler.php?action=return_loan', {
+                    method: 'POST',
+                    body: JSON.stringify({ id }), // Send data as JSON
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle success or error from the server
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Peminjaman ' + data.id + ' selesai.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            }).then(() => {
+                                window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                            });
+                        } else if (data.fines_set) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Peminjaman telat ' + data.day_late + ' hari!',
+                                text: 'Harap bayar denda sebesar Rp. ' + data.fines + '.',
+                                confirmButtonText: 'Dibayar',
+                                cancelButtonText: 'Nanti',
+                                showCancelButton: true,
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn',
+                                    cancelButton: 'no-color-btn'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    fetch('/lokapustaka/request_handler.php?action=fines_paid', {
+                                        method: 'POST',
+                                        body: JSON.stringify({ id }),
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                    })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: 'Denda Dibayar!',
+                                                    text: 'Denda berhasil dibayar. Peminjaman ' + data.id + ' selesai!',
+                                                    confirmButtonText: 'OK',
+                                                    color: '#262626',
+                                                    customClass: {
+                                                        confirmButton: 'pri-color-btn'
+                                                    }
+                                                }).then(() => {
+                                                    window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                                });
+                                            } else {
+                                                Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            Swal.fire('Gagal', 'Kesalahan saat menghubungkan dengan server.', 'error');
+                                        });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Denda Belum Dibayar',
+                                        text: 'Silakan selesaikan pembayaran denda nanti.',
+                                        confirmButtonText: 'OK',
+                                        color: '#262626',
+                                        customClass: {
+                                            confirmButton: 'pri-color-btn'
+                                        }
+                                    }).then(() => {
+                                        window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                    });
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: data.message || 'Terjadi kesalahan saat menyelesaikan peminjaman.',
+                                confirmButtonText: 'OK',
+                                color: '#262626',
+                                customClass: {
+                                    confirmButton: 'pri-color-btn'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Handle fetch errors
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghubungi server.',
+                            confirmButtonText: 'OK',
+                            color: '#262626',
+                            customClass: {
+                                confirmButton: 'pri-color-btn'
+                            }
+                        });
+                    });
+            }
+        });
+    }
 </script>

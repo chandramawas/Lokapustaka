@@ -19,7 +19,6 @@ define('EXPECTED_RETURN_DATE', '7 DAY'); //Batas waktu peminjaman
 define('EXPECTED_RETURN_DATE_TEXT', '7 hari'); //Batas waktu peminjaman
 define('FINES', '50000'); //Denda keterlambatan per hari
 
-
 // Set timezone to WIB
 date_default_timezone_set('Asia/Jakarta');
 $current_time = date('d/m/Y H:i'); // Format: DD/MM/YYYY HH:MM

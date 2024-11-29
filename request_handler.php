@@ -67,6 +67,26 @@ switch ($action) {
         handleDeleteBook($conn);
         break;
 
+    case 'add_loan':
+        handleAddLoan($conn);
+        break;
+
+    case 'delete_loan':
+        handleDeleteLoan($conn);
+        break;
+
+    case 'extend_loan':
+        handleExtendLoan($conn);
+        break;
+
+    case 'return_loan':
+        handleReturnLoan($conn);
+        break;
+
+    case 'fines_paid':
+        handleFinesPaid($conn);
+        break;
+
     default:
         echo '<script>alert("Aksi tidak valid."); window.location.href = "/lokapustaka/pages/dashboard.php"</script>';
 }
@@ -175,7 +195,7 @@ function handleAddStaff($conn)
     $password = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
 
     // Check if the phone number already exists
-    $stmt = $conn->prepare('SELECT * FROM users WHERE phone_num = ?');
+    $stmt = $conn->prepare('SELECT id FROM users WHERE phone_num = ?');
     $stmt->bind_param('s', $phone_num);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -522,12 +542,12 @@ function handleAddBook($conn)
         echo json_encode(['success' => false, 'message' => 'ISBN sudah terdaftar!']);
     } else {
         $sql = "
-        INSERT INTO books (title, isbn, cover, author, category, publisher, year_published, stock, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO books (title, isbn, cover, author, category, publisher, year_published, available_stock, stock, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'sssssssis',
+            'sssssssiis',
             $title,
             $isbn,
             $cover,
@@ -535,6 +555,7 @@ function handleAddBook($conn)
             $category,
             $publisher,
             $year_published,
+            $stock,
             $stock,
             $created_by
         );
@@ -644,4 +665,268 @@ function handleDeleteBook($conn)
     }
 }
 
+function handleAddLoan($conn)
+{
+    header('Content-Type: application/json');
+
+    // Get the raw POST data (since it's JSON)
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if ($data === null) {
+        // If JSON is invalid, return an error message
+        echo json_encode(['success' => false, 'message' => 'Invalid JSON data received.']);
+        return;
+    }
+
+    $book_id_isbn = $data['book_id_isbn'];
+    $member_id = $data['member_id'];
+    $phone_num = $data['phone_num'];
+    $created_by = $_SESSION['users_id'];
+
+    $sql = "
+    SELECT id, available_stock, isbn FROM books WHERE id = ? OR isbn = ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ss', $book_id_isbn, $book_id_isbn);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    if (!$row) {
+        echo json_encode(['success' => false, 'message' => 'Buku tidak ditemukan.']);
+        return;
+    }
+
+    $book_id = $row['id'];
+    $stock = $row['available_stock'];
+
+    if ($stock > 0) {
+        $sql = "
+        SELECT
+            CASE
+                WHEN expired_date > NOW() THEN 'Aktif'
+                ELSE 'Kadaluarsa'
+            END status
+        FROM members
+        WHERE
+            id = ? 
+            AND phone_num = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ss', $member_id, $phone_num);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $member_status = $row['status'];
+
+            if ($member_status == 'Aktif') {
+                $sql = "
+                SELECT id, return_date
+                FROM loans
+                WHERE
+                    member_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+                ";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('s', $member_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+
+                if (!$row || $row['return_date'] !== NULL) {
+                    $sql = "
+                    INSERT INTO
+                        loans (
+                            member_id,
+                            book_id,
+                            expected_return_date,
+                            created_by
+                        )
+                    VALUES (
+                            ?,
+                            ?,
+                            DATE_ADD(NOW(), INTERVAL " . EXPECTED_RETURN_DATE . "),
+                            ?
+                        )
+                    ";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param('sss', $member_id, $book_id, $created_by);
+
+                    if ($stmt->execute()) {
+                        $id = $conn->insert_id;
+
+                        $sql = "
+                        UPDATE books SET available_stock = (available_stock - 1) WHERE id = ?
+                        ";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param('s', $book_id);
+                        $stmt->execute();
+
+                        $sql = "SELECT expected_return_date FROM loans WHERE id = ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param('i', $id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $row = $result->fetch_assoc();
+                        $expected_return_date = formatDate($row['expected_return_date']);
+
+                        echo json_encode(['success' => true, 'id' => $id, 'expected_return_date' => $expected_return_date]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Gagal mendaftarkan peminjaman baru.']);
+                    }
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Anggota belum mengembalikan pinjaman sebelumnya!']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Anggota sudah kadaluarsa, silahkan perpanjang terlebih dahulu!']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'ID Anggota dan Nomor Telepon tidak cocok!']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Stock buku habis!']);
+    }
+}
+
+function handleDeleteLoan($conn)
+{
+    $data = json_decode(file_get_contents('php://input'), true);
+    $password = $data['password'];
+    $id = $data['id'];
+
+    $stmt = $conn->prepare('SELECT password FROM users WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+
+        if (password_verify($password, $row['password'])) {
+            $stmt = $conn->prepare('DELETE FROM loans WHERE id = ?');
+            $stmt->bind_param('s', $id);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal untuk menghapus peminjaman']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Password Salah']);
+        }
+    }
+}
+
+function handleExtendLoan($conn)
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'];
+
+    $sql = "SELECT max_extend FROM loans WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    if ($row['max_extend'] === 0) {
+        $sql = "
+        UPDATE loans 
+            SET expected_return_date = DATE_ADD(expected_return_date, INTERVAL " . EXPECTED_RETURN_DATE . "), 
+                max_extend = 1 
+            WHERE id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $id);
+
+        if ($stmt->execute()) {
+            $sql = "SELECT expected_return_date FROM loans WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $expected_return_date = formatDate($row['expected_return_date']);
+
+            echo json_encode(['success' => true, 'id' => $id, 'expected_return_date' => $expected_return_date]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal memperpanjang peminjaman.']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Peminjaman sudah pernah diperpanjang.']);
+    }
+}
+
+function handleReturnLoan($conn)
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'];
+
+    $sql = "
+    SELECT
+        id,
+        CASE
+            WHEN DATEDIFF(NOW(), expected_return_date) <= 0 THEN NULL
+            ELSE DATEDIFF(NOW(), expected_return_date)
+        END AS day_late
+    FROM loans
+    WHERE
+        id = ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    $day_late = $row['day_late'];
+    $fines = 50000 * $day_late;
+
+    if ($fines === 0) {
+        $sql = "
+        UPDATE loans SET return_date = NOW() WHERE id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'id' => $id]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal mengakhiri pinjaman.']);
+        }
+    } else {
+        $sql = "
+        UPDATE loans SET fines = ? WHERE id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ii', $fines, $id);
+        $stmt->execute();
+
+        echo json_encode(['fines_set' => true, 'id' => $id, 'day_late' => $day_late, 'fines' => $fines]);
+    }
+}
+
+function handleFinesPaid($conn)
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'];
+
+    $sql = "
+    UPDATE loans SET return_date = NOW() WHERE id = ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'id' => $id]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Gagal mengakhiri pinjaman.']);
+    }
+}
 ?>

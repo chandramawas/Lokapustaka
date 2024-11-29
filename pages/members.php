@@ -268,7 +268,7 @@ if (isset($_GET['id'])) {
             <?php else: ?>
                 <div class="head mb16">
                     <div class="title">
-                        <p class="f14 f-sub">Id Anggota</p>
+                        <p class="f14 f-sub">ID Anggota</p>
                         <h3><?= $member['id'] ?></h3>
                     </div>
                     <div class="head-button">
@@ -314,8 +314,8 @@ if (isset($_GET['id'])) {
                     <table class="sortable">
                         <thead>
                             <tr>
-                                <th class="w75" data-column="id">Id</th>
-                                <th class="w75" data-column="book_id">Id Buku</th>
+                                <th class="w75" data-column="id">ID</th>
+                                <th class="w75" data-column="book_id">ID Buku</th>
                                 <th data-column="book_title">Judul Buku</th>
                                 <th class="w75" data-column="borrow_date">Tgl Pinjam</th>
                                 <th class="w75" data-column="expected_return_date">Tenggat Waktu</th>
@@ -435,7 +435,7 @@ if (isset($_GET['id'])) {
                     <div class="head-button">
                         <form action="" method="get">
                             <input type="text" class="search-b head-b mr8" name="search" id="search"
-                                placeholder="Cari Id atau Nama"
+                                placeholder="Cari ID atau Nama"
                                 value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                             <?php if (isset($_GET['exclude_expired'])): ?>
                                 <input type="hidden" name="exclude_expired" value="<?= $_GET['exclude_expired'] ?>">
@@ -453,7 +453,7 @@ if (isset($_GET['id'])) {
                             <thead>
                                 <tr>
                                     <th class="w75" data-column="id">
-                                        Id
+                                        ID
                                         <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                     </th>
                                     <th data-column="name">Nama</th>
@@ -485,7 +485,7 @@ if (isset($_GET['id'])) {
                         <thead>
                             <tr>
                                 <th class="w75" data-column="id">
-                                    Id
+                                    ID
                                     <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
                                 </th>
                                 <th data-column="name">Nama</th>
