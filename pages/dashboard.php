@@ -79,8 +79,8 @@ $returned_today = $row['total']; // Store result into variable
             <p id="wib-time" class="f12"><?= $current_time . " WIB" ?></p>
         </div>
         <h3 class="mb16">Dasbor</h3>
-        <div class="b-list mb16">
-            <a href="/lokapustaka/pages/loans.php?action=add" class="pri-b mr16">
+        <div class="b-list">
+            <a href="" class="pri-b mr16">
                 <img src="/lokapustaka/img/loans-add-light.png" alt="Tambah Peminjaman">
                 <p class="f-white font-bold">PEMINJAMAN BARU</p>
             </a>
@@ -96,38 +96,6 @@ $returned_today = $row['total']; // Store result into variable
                 <img src="/lokapustaka/img/members-search-dark.png" alt="Cari Anggota">
                 <p class="font-bold">ANGGOTA</p>
             </a>
-        </div>
-        <div class="b-list mb16">
-            <div class="container dashboard button mr16"
-                onclick="window.location.href = '/lokapustaka/pages/loans.php?notReturned=on'">
-                <p class="f14 f-sub">Belum dikembalikan dengan tenggat waktu hari ini (dan sebelumnya)</p>
-                <h4><?= $not_returned_today_before ?> Buku</h4>
-            </div>
-            <div class="container dashboard button mr16"
-                onclick="window.location.href = '/lokapustaka/pages/loans.php'">
-                <p class="f14 f-sub">Buku yang dikembalikan hari ini</p>
-                <h4><?= $returned_today ?> Buku</h4>
-            </div>
-        </div>
-        <hr class="mb16">
-        <p class="f16 font-bold mb8 t-center">Total Peminjaman</p>
-        <div class="b-list">
-            <div class="container dashboard mr16">
-                <p class="f14 f-sub">12 Bulan Terakhir</p>
-                <h4><?= $last_12_months ?> Peminjaman</h4>
-            </div>
-            <div class="container dashboard mr16">
-                <p class="f14 f-sub">30 Hari Terakhir</p>
-                <h4><?= $last_30_days ?> Peminjaman</h4>
-            </div>
-            <div class="container dashboard mr16">
-                <p class="f14 f-sub">7 Hari Terakhir</p>
-                <h4><?= $last_7_days ?> Peminjaman</h4>
-            </div>
-            <div class="container dashboard">
-                <p class="f14 f-sub">Belum Dikembalikan</p>
-                <h4><?= $not_returned ?> Peminjaman</h4>
-            </div>
         </div>
     </main>
 
