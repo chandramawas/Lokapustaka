@@ -93,7 +93,17 @@ if (isset($_GET['id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peminjaman - <?= APP ?></title>
+    <title><?php
+    if (isset($loan)) {
+        echo "Peminjaman " . $loan['id'] . " - " . APP;
+    } else {
+        if (isset($_GET['action']) == 'add') {
+            echo "Tambah Peminjaman - " . APP;
+        } else {
+            echo "Peminjaman - " . APP;
+        }
+    }
+    ?></title>
     <link
         href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
@@ -103,7 +113,17 @@ if (isset($_GET['id'])) {
 <body>
     <main>
         <div class="top mb16">
-            <p class="f14">/ Peminjaman</p>
+            <p class="f14"><?php
+            if (isset($loan)) {
+                echo "<a class='f-sub' href='loans.php'>/ Peminjaman</a> / " . $loan['id'];
+            } else {
+                if (isset($_GET['action']) == 'add') {
+                    echo "<a class='f-sub' href='loans.php'>/ Peminjaman</a> / Tambah";
+                } else {
+                    echo "/ Peminjaman";
+                }
+            }
+            ?></p>
             <p id="wib-time" class="f12"><?= $current_time . " WIB" ?></p>
         </div>
         <?php if (isset($loan)): ?>
