@@ -10,8 +10,8 @@ if (isset($_GET['id'])) {
     SELECT
         a.*,
         CASE
-            WHEN a.created_by IS NULL
-            AND a.id != 'S0001' THEN '[Staff Dihapus]'
+            WHEN a.created_by IS NULL THEN '[Staff Dihapus]'
+            WHEN a.created_by = 'root' THEN NULL
             ELSE b.name
         END AS created_by_name
     FROM users as a
@@ -32,7 +32,14 @@ if (isset($_GET['id'])) {
         <?php
     }
 } else {
-    $stmt = $conn->prepare("SELECT * FROM users ORDER BY id ASC");
+    $stmt = $conn->prepare("
+    SELECT id, name, phone_num, roles
+    FROM users
+    WHERE
+        roles = 'Admin'
+        OR roles = 'Staff'
+    ORDER BY id ASC;
+    ");
     $stmt->execute();
     $result = $stmt->get_result();
     $staffs = $result->fetch_all(MYSQLI_ASSOC);
@@ -41,9 +48,14 @@ if (isset($_GET['id'])) {
         $search = trim($_GET['search']) . '*';
 
         $sql = "
-        SELECT * FROM users
-        WHERE MATCH(id, name) AGAINST(? IN BOOLEAN MODE)
-        ORDER BY id ASC
+        SELECT id, name, phone_num, roles
+        FROM users
+        WHERE (
+                roles = 'Admin'
+                OR roles = 'Staff'
+            )
+            AND MATCH(id, name) AGAINST (? IN BOOLEAN MODE)
+        ORDER BY id ASC;
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $search);

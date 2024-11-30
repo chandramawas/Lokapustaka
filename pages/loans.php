@@ -44,7 +44,14 @@ if (isset($_GET['id'])) {
     $stmt->bind_param('s', $id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $loan = $result->fetch_assoc();
+
+    if ($result->num_rows > 0) {
+        $loan = $result->fetch_assoc();
+    } else {
+        ?>
+        <script>alert("Peminjaman tidak ditemukan."); history.back()</script>
+        <?php
+    }
 } else {
     $notReturned = isset($_GET['notReturned']) ? 1 : 0;
 
@@ -245,7 +252,10 @@ if (isset($_GET['id'])) {
                 <table class="sortable">
                     <thead>
                         <tr>
-                            <th class="w75" data-column="id">ID</th>
+                            <th class="w75" data-column="id">
+                                ID
+                                <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
+                            </th>
                             <th class="w75" data-column="book_id">ID Buku</th>
                             <th class="w75" data-column="member_id">ID Peminjam</th>
                             <th data-column="member_name">Nama Peminjam</th>

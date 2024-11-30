@@ -1,5 +1,9 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php";
+
+if (empty($_SESSION['users_id']) || empty($_SESSION['users_name']) || empty($_SESSION['users_roles'])) {
+    echo '<script>alert("Sesi Habis. Silahkan login kembali!"); location.href = "/lokapustaka/pages/login.php"</script>';
+}
 ?>
 
 <aside class="mr16">
@@ -29,7 +33,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
             data-dark-src="/lokapustaka/img/loans-dark.png">
         <p class="font-medium">Peminjaman</p>
     </a>
-    <?php if ($_SESSION['users_roles'] == 'Admin'): ?>
+    <?php if ($_SESSION['users_roles'] == 'Admin' || $_SESSION['users_roles'] == 'Superadmin'): ?>
         <a href="/lokapustaka/pages/staff.php" class="opt mb12">
             <img src="/lokapustaka/img/staff-dark.png" alt="" data-light-src="/lokapustaka/img/staff-light.png"
                 data-dark-src="/lokapustaka/img/staff-dark.png">

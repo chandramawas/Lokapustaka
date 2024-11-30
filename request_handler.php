@@ -119,10 +119,10 @@ function handleLogin($conn)
             $_SESSION['users_roles'] = $row['roles'];
             header("Location: /lokapustaka/pages/dashboard.php");
         } else {
-            echo "Password salah!";
+            echo '<script>alert("Password Salah."); history.back()</script>';
         }
     } else {
-        echo "Staff ID tidak ditemukan!";
+        echo '<script>alert("ID Staff tidak ditemukan."); history.back()</script>';
     }
 
     $stmt->close();
@@ -826,18 +826,51 @@ function handleExtendLoan($conn)
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'];
 
-    $sql = "SELECT max_extend FROM loans WHERE id = ?";
+    $sql = "
+    SELECT
+        id,
+        CASE
+            WHEN DATEDIFF(NOW(), expected_return_date) <= 0 THEN NULL
+            ELSE DATEDIFF(NOW(), expected_return_date)
+        END AS day_late
+    FROM loans
+    WHERE
+        id = ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    $fines = FINES * $row['day_late'];
+
+    if ($fines !== 0) {
+        $sql = "
+        UPDATE loans SET fines = ? WHERE id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ii', $fines, $id);
+        $stmt->execute();
+    }
+
+    $sql = "SELECT fines, max_extend FROM loans WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $id);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
 
+    if ($row['fines'] !== NULL) {
+        echo json_encode(['success' => false, 'message' => 'Anda telat mengembalikan/memperpanjang. Silahkan bayar denda terlebih dahulu.']);
+        return false;
+    }
+
     if ($row['max_extend'] === 0) {
         $sql = "
         UPDATE loans 
             SET expected_return_date = DATE_ADD(expected_return_date, INTERVAL " . EXPECTED_RETURN_DATE . "), 
-                max_extend = 1 
+                max_extend = 1, fines = NULL 
             WHERE id = ?
         ";
         $stmt = $conn->prepare($sql);
@@ -886,7 +919,7 @@ function handleReturnLoan($conn)
     $row = $result->fetch_assoc();
 
     $day_late = $row['day_late'];
-    $fines = 50000 * $day_late;
+    $fines = FINES * $day_late;
 
     if ($fines === 0) {
         $sql = "
