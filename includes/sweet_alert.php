@@ -80,7 +80,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
         });
     }
 
-    function resetPasswordStaff(id) {
+    function resetPassword(id) {
         Swal.fire({
             title: 'Reset Password ' + id + ' ke Default?',
             text: 'Password default adalah <?= DEFAULT_PASS ?>', // PHP variable
@@ -161,7 +161,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Staff berhasil dihapus!', '', 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/staff.php';
+                                    window.location.href = '/lokapustaka/staff/staff.php';
                                 });
                         } else {
                             Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -237,7 +237,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/staff.php?id=${result.id}`;
+                                window.location.href = `/lokapustaka/staff/staff.php?id=${result.id}`;
                             });
                         } else {
                             Swal.fire({
@@ -327,7 +327,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = '/lokapustaka/pages/staff.php?id=' + result.id;
+                                window.location.href = '/lokapustaka/staff/staff.php?id=' + result.id;
                             });
                         } else {
                             Swal.fire({
@@ -423,7 +423,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/members.php?id=${result.id}`;
+                                window.location.href = `/lokapustaka/staff/members.php?id=${result.id}`;
                             });
                         } else {
                             Swal.fire({
@@ -513,7 +513,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = '/lokapustaka/pages/members.php?id=' + result.id;
+                                window.location.href = '/lokapustaka/staff/members.php?id=' + result.id;
                             });
                         } else {
                             Swal.fire({
@@ -584,7 +584,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Anggota berhasil dihapus!', '', 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/members.php';
+                                    window.location.href = '/lokapustaka/staff/members.php';
                                 });
                         } else {
                             Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -625,7 +625,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Keanggotaan ' + data.id + ' berhasil diperpanjang!', 'Masa aktif sampai ' + data.expired_date, 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/members.php?id=' + data.id;
+                                    window.location.href = '/lokapustaka/staff/members.php?id=' + data.id;
                                 });
                         } else {
                             Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -692,7 +692,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/books.php?id=${result.id}`;
+                                window.location.href = `/lokapustaka/staff/books.php?id=${result.id}`;
                             });
                         } else {
                             Swal.fire({
@@ -776,7 +776,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/books.php?id=${result.id}`;
+                                window.location.href = `/lokapustaka/staff/books.php?id=${result.id}`;
                             });
                         } else {
                             Swal.fire({
@@ -846,7 +846,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Anggota berhasil dihapus!', '', 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/books.php';
+                                    window.location.href = '/lokapustaka/staff/books.php';
                                 });
                         } else {
                             Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -922,7 +922,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                window.location.href = `/lokapustaka/staff/loans.php?id=${data.id}`;
                             });
                         } else {
                             Swal.fire({
@@ -993,7 +993,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Peminjaman berhasil dihapus!', '', 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/loans.php';
+                                    window.location.href = '/lokapustaka/staff/loans.php';
                                 });
                         } else {
                             Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -1205,7 +1205,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `/lokapustaka/pages/loans.php?id=${result.value.id}`
+                window.location.href = `/lokapustaka/staff/loans.php?id=${result.value.id}`
             }
         });
     }
@@ -1237,7 +1237,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `/lokapustaka/pages/books.php?search=${result.value.search}`
+                window.location.href = `/lokapustaka/staff/books.php?search=${result.value.search}`
             }
         });
     }
@@ -1269,7 +1269,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `/lokapustaka/pages/members.php?search=${result.value.search}`
+                window.location.href = `/lokapustaka/staff/members.php?search=${result.value.search}`
             }
         });
     }

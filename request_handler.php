@@ -4,7 +4,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/db.php";
 
 // Cek apakah parameter 'action' ada
 if (!isset($_GET['action'])) {
-    echo 'alert("Aksi tidak valid."); location.href = "/lokapustaka/pages/dashboard.php"';
+    echo 'alert("Aksi tidak valid."); location.href = "/lokapustaka/staff/dashboard.php"';
 }
 
 // Ambil parameter 'action'
@@ -88,14 +88,14 @@ switch ($action) {
         break;
 
     default:
-        echo '<script>alert("Aksi tidak valid."); window.location.href = "/lokapustaka/pages/dashboard.php"</script>';
+        echo '<script>alert("Aksi tidak valid."); window.location.href = "/lokapustaka/staff/dashboard.php"</script>';
 }
 
 function handleLogin($conn)
 {
     // Pastikan permintaan POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        echo '<script>alert("Metode tidak valid."); window.location.href = "/lokapustaka/pages/dashboard.php"</script>';
+        echo '<script>alert("Metode tidak valid."); window.location.href = "/lokapustaka/staff/dashboard.php"</script>';
     }
 
     // Ambil data dari form
@@ -103,13 +103,32 @@ function handleLogin($conn)
     $password = $_POST['password'];
 
     // Query ke database
-    $stmt = $conn->prepare("SELECT * FROM staffs WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, name, roles, password FROM staffs WHERE id = ?");
     $stmt->bind_param("s", $id);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $staff_result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
+    $stmt = $conn->prepare("
+    SELECT
+        id,
+        name,
+        expired_date,
+        CASE
+            WHEN expired_date > NOW() THEN 'Aktif'
+            ELSE 'Kadaluarsa'
+        END status,
+        phone_num,
+        password
+    FROM members
+    WHERE
+        id = ?
+    ");
+    $stmt->bind_param("s", $id);
+    $stmt->execute();
+    $members_result = $stmt->get_result();
+
+    if ($staff_result->num_rows > 0) {
+        $row = $staff_result->fetch_assoc();
 
         // Verifikasi password
         if (password_verify($password, $row['password'])) {
@@ -117,12 +136,30 @@ function handleLogin($conn)
             $_SESSION['staffs_id'] = $row['id'];
             $_SESSION['staffs_name'] = $row['name'];
             $_SESSION['staffs_roles'] = $row['roles'];
-            header("Location: /lokapustaka/pages/dashboard.php");
+            header("Location: /lokapustaka/staff/dashboard.php");
+        } else {
+            echo '<script>alert("Password Salah."); history.back()</script>';
+        }
+    } elseif ($members_result->num_rows > 0) {
+        $row = $members_result->fetch_assoc();
+
+        // Verifikasi password
+        if (password_verify($password, $row['password'])) {
+            if ($row['status'] === 'Aktif') {
+                // Login berhasil
+                $_SESSION['members_id'] = $row['id'];
+                $_SESSION['members_name'] = $row['name'];
+                $_SESSION['members_expired_date'] = $row['expired_date'];
+                $_SESSION['members_phone_num'] = $row['phone_num'];
+                header("Location: /lokapustaka/");
+            } else {
+                echo '<script>alert("Akun Anda telah kadaluarsa. Silakan perpanjang di perpustakaan."); history.back()</script>';
+            }
         } else {
             echo '<script>alert("Password Salah."); history.back()</script>';
         }
     } else {
-        echo '<script>alert("ID Staff tidak ditemukan."); history.back()</script>';
+        echo '<script>alert("ID tidak ditemukan."); history.back()</script>';
     }
 
     $stmt->close();
@@ -133,38 +170,46 @@ function handleLogout()
     session_start();
     session_unset();
     session_destroy();
-    header("Location: /lokapustaka/pages/login.php");
+    header("Location: /lokapustaka/login.php");
     exit;
 }
 
 function handleChangePassword($conn)
 {
-    $userId = $_SESSION['staffs_id'];
-
     // Get the JSON data sent via fetch
     $data = json_decode(file_get_contents('php://input'), true);
     $currentPassword = $data['currentPassword'];
-    $newPassword = $data['newPassword'];
+    $newPassword = password_hash($data['newPassword'], PASSWORD_DEFAULT);
 
-    // Fetch the user's current password from the database
-    $stmt = $conn->prepare("SELECT password FROM staffs WHERE id = ?");
-    $stmt->bind_param("s", $userId);
+    if (!empty($_SESSION['staffs_id'])) {
+        $id = $_SESSION['staffs_id'];
+
+        // Fetch the user's current password from the database
+        $stmt = $conn->prepare("SELECT password FROM staffs WHERE id = ?");
+    } elseif (!empty($_SESSION['members_id'])) {
+        $id = $_SESSION['members_id'];
+        $stmt = $conn->prepare("SELECT password FROM members WHERE id = ?");
+    }
+
+    $stmt->bind_param("s", $id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+    $row = $result->fetch_assoc();
 
     // Verify the current password
-    if (!password_verify($currentPassword, $user['password'])) {
+    if (!password_verify($currentPassword, $row['password'])) {
         echo json_encode(['success' => false, 'message' => 'Password lama salah']);
         exit;
     }
 
-    // Hash the new password
-    $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    if (!empty($_SESSION['staffs_id'])) {
+        $stmt = $conn->prepare("UPDATE staffs SET password = ? WHERE id = ?");
+    } elseif (!empty($_SESSION['members_id'])) {
+        $stmt = $conn->prepare("UPDATE members SET password = ? WHERE id = ?");
+    }
 
     // Update the password in the database
-    $stmt = $conn->prepare("UPDATE staffs SET password = ? WHERE id = ?");
-    $stmt->bind_param("ss", $newPasswordHash, $userId);
+    $stmt->bind_param("ss", $newPassword, $id);
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
@@ -309,12 +354,32 @@ function handleResetPassword($conn)
     $id = $data['id'];
     $password = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare('UPDATE staffs SET password = ? WHERE id = ?');
-    $stmt->bind_param('ss', $password, $id);
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Gagal mereset password']);
+    $stmt = $conn->prepare("SELECT id FROM staffs WHERE id = ?");
+    $stmt->bind_param("s", $id);
+    $stmt->execute();
+    $staff_result = $stmt->get_result();
+
+    $stmt = $conn->prepare("SELECT id FROM members WHERE id = ?");
+    $stmt->bind_param("s", $id);
+    $stmt->execute();
+    $member_result = $stmt->get_result();
+
+    if ($staff_result->num_rows > 0) {
+        $stmt = $conn->prepare('UPDATE staffs SET password = ? WHERE id = ?');
+        $stmt->bind_param('ss', $password, $id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal mereset password']);
+        }
+    } elseif ($member_result->num_rows > 0) {
+        $stmt = $conn->prepare('UPDATE members SET password = ? WHERE id = ?');
+        $stmt->bind_param('ss', $password, $id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal mereset password']);
+        }
     }
 }
 
@@ -334,6 +399,7 @@ function handleAddMember($conn)
 
     $name = $data['name'];
     $phone_num = $data['phone_num'];
+    $password = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
     $street = $data['street'];
     $home_num = $data['home_num'];
     $province = $data['province'];
@@ -355,14 +421,15 @@ function handleAddMember($conn)
     } else {
         // Insert new staff into the database
         $sql = "
-        INSERT INTO members (name, phone_num, street, home_num, province, regency, district, village, postal_code, created_by, expired_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL " . EXPIRED_DATE . "))
+        INSERT INTO members (name, phone_num, password, street, home_num, province, regency, district, village, postal_code, created_by, expired_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL " . EXPIRED_DATE . "))
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
             'ssssssssss',
             $name,
             $phone_num,
+            $password,
             $street,
             $home_num,
             $province,

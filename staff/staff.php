@@ -156,7 +156,7 @@ if (isset($_GET['id'])) {
                         <h3><?= $staff['id'] ?></h3>
                     </div>
                     <div class="head-button">
-                        <a href="#" onclick="resetPasswordStaff('<?= $staff['id'] ?>')" class="fou-b head-b mr8">
+                        <a href="#" onclick="resetPassword('<?= $staff['id'] ?>')" class="fou-b head-b mr8">
                             Reset Password
                         </a>
                         <a href="?id=<?= $staff['id'] ?>&action=edit" class="thi-b head-b mr8">

@@ -22,18 +22,19 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/db.php";
             <div class="logo login mb8">
                 <img src="/lokapustaka/img/icon.png" class="mr8">
             </div>
-            <p class="font-bold t-center mb16">Staff Login</p>
+            <p class="font-bold t-center mb16">Login <?= APP ?></p>
             <form action="/lokapustaka/request_handler.php?action=login" method="post">
                 <div class="input-container mb12">
-                    <img src="/lokapustaka/img/staff-dark.png" alt="Staff Icon" class="icon">
-                    <input type="text" name="id" id="id" placeholder="ID Staff" required>
+                    <img src="/lokapustaka/img/staff-dark.png" alt="ID Icon" class="icon">
+                    <input type="text" name="id" id="id" placeholder="ID" required>
                 </div>
                 <div class="input-container mb12">
                     <img src="/lokapustaka/img/password-dark.png" alt="Password Icon" class="icon">
                     <input type="password" name="password" id="password" placeholder="Password" required>
                 </div>
-                <input type="submit" value="Masuk" class="sec-b">
+                <input type="submit" value="Masuk" class="sec-b mb16">
             </form>
+            <p onclick="window.location.href='/lokapustaka/'" class="t-center f-redir2 f12">Kembali</p>
         </div>
     </div>
 </body>

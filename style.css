@@ -26,7 +26,6 @@
 body {
     background-color: var(--c-100);
     cursor: default;
-    padding: 20px;
     display: flex;
     justify-content: center;
     width: 100%;
@@ -73,7 +72,7 @@ aside p {
 
 /*------------*/
 
-/* Font Weights */
+/* Font Redir */
 .f-redir {
     color: blueviolet;
 }
@@ -81,6 +80,17 @@ aside p {
 .f-redir:hover {
     color: blue;
     text-decoration: underline;
+    cursor: pointer;
+}
+
+.f-redir2 {
+    color: var(--c-400);
+    text-decoration: underline;
+}
+
+.f-redir2:hover {
+    color: var(--c-700);
+    cursor: pointer;
 }
 
 /*------------*/
@@ -151,6 +161,10 @@ aside p {
 
 .mr16 {
     margin-right: 16px;
+}
+
+.mr20 {
+    margin-right: 20px;
 }
 
 /*----------------*/
@@ -400,11 +414,19 @@ input[type=checkbox] {
 }
 
 main {
-    padding: 8px;
     width: 85%;
+    margin-left: 15%;
+    padding: 20px;
+    padding-left: 50px;
 }
 
 aside {
+    position: fixed;
+    /* Make aside fixed */
+    top: 20px;
+    /* Set the distance from the top of the viewport */
+    left: 20px;
+    /* Set the distance from the left of the viewport */
     background-color: var(--c-50);
     border-radius: 12px;
     box-shadow: var(--shadow);
@@ -413,11 +435,25 @@ aside {
     overflow-y: scroll;
     scrollbar-width: none;
     width: 15%;
+    /* Adjust width as needed */
     min-width: 200px;
+    height: calc(100vh - 40px);
+    /* Adjust height to be full height minus some margin */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
 }
 
 aside::-webkit-scrollbar {
     display: none;
+    /* Hide scrollbar for webkit browsers */
+}
+
+.aside.top {
+    display: block;
+}
+
+.aside.bot {
+    display: block;
 }
 
 .top {
@@ -432,16 +468,6 @@ aside::-webkit-scrollbar {
     align-items: center;
     justify-content: left;
     padding: 4px 8px;
-}
-
-button.exit {
-    background: none;
-    border: none;
-    padding: none;
-}
-
-button.exit:hover {
-    cursor: pointer;
 }
 
 .opt img,
@@ -580,3 +606,75 @@ tbody tr:last-of-type {
 }
 
 /*-----------*/
+
+.container3 {
+    width: 20%;
+    height: fit-content;
+    padding: 12px;
+    background-color: white;
+    border: 1px solid var(--c-300);
+    border-radius: 8px;
+    display: inline-block;
+    width: 18%;
+    margin: 1%;
+    vertical-align: top;
+    position: relative;
+}
+
+.container3:hover {
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.container3 p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.container3 .cover {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Black background with transparency */
+    color: white;
+    /* Text color */
+    display: flex;
+    align-items: center;
+    /* Center vertically */
+    justify-content: center;
+    /* Center horizontally */
+    font-size: 1.2em;
+    /* Font size */
+    border-radius: 8px;
+    /* Match border radius of container */
+    visibility: hidden;
+    /* Hidden by default */
+}
+
+.container3.out-of-stock .overlay {
+    visibility: visible;
+    /* Show overlay if out of stock */
+}
+
+.m-hor {
+    margin-left: 1%;
+    margin-right: 1%;
+}

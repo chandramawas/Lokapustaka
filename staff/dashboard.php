@@ -80,7 +80,7 @@ $returned_today = $row['total']; // Store result into variable
         </div>
         <h3 class="mb16">Dasbor</h3>
         <div class="b-list mb16">
-            <a href="/lokapustaka/pages/loans.php?action=add" class="pri-b mr16">
+            <a href="/lokapustaka/staff/loans.php?action=add" class="pri-b mr16">
                 <img src="/lokapustaka/img/loans-add-light.png" alt="Tambah Peminjaman">
                 <p class="f-white font-bold">PEMINJAMAN BARU</p>
             </a>
@@ -99,12 +99,12 @@ $returned_today = $row['total']; // Store result into variable
         </div>
         <div class="b-list mb16">
             <div class="container dashboard button mr16"
-                onclick="window.location.href = '/lokapustaka/pages/loans.php?notReturned=on'">
+                onclick="window.location.href = '/lokapustaka/staff/loans.php?notReturned=on'">
                 <p class="f14 f-sub">Belum dikembalikan dengan tenggat waktu hari ini (dan sebelumnya)</p>
                 <h4><?= $not_returned_today_before ?> Buku</h4>
             </div>
             <div class="container dashboard button mr16"
-                onclick="window.location.href = '/lokapustaka/pages/loans.php'">
+                onclick="window.location.href = '/lokapustaka/staff/loans.php'">
                 <p class="f14 f-sub">Buku yang dikembalikan hari ini</p>
                 <h4><?= $returned_today ?> Buku</h4>
             </div>
