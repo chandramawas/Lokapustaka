@@ -832,7 +832,7 @@ function handleDeleteLoan($conn)
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['password'])) {
-            $stmt = $conn->prepare('SELECT book_id FROM loans WHERE id = ?');
+            $stmt = $conn->prepare('SELECT book_id FROM loans WHERE return_date IS NULL AND id = ?');
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $result = $stmt->get_result();
