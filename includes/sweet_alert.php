@@ -1034,10 +1034,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                         if (data.success) {
                             Swal.fire('Peminjaman ' + data.id + ' berhasil diperpanjang!', 'Tenggat Waktu sampai ' + data.expected_return_date, 'success')
                                 .then(() => {
-                                    window.location.href = '/lokapustaka/pages/loans.php?id=' + data.id;
+                                    window.location.reload();
                                 });
                         } else {
-                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                            Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error')
+                                .then(() => {
+                                    window.location.reload();
+                                });
                         }
                     })
                     .catch(error => {
@@ -1083,7 +1086,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                     confirmButton: 'pri-color-btn'
                                 }
                             }).then(() => {
-                                window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                window.location.reload();
                             });
                         } else if (data.fines_set) {
                             Swal.fire({
@@ -1120,7 +1123,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                                         confirmButton: 'pri-color-btn'
                                                     }
                                                 }).then(() => {
-                                                    window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                                    window.location.reload();
                                                 });
                                             } else {
                                                 Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
@@ -1141,7 +1144,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                                             confirmButton: 'pri-color-btn'
                                         }
                                     }).then(() => {
-                                        window.location.href = `/lokapustaka/pages/loans.php?id=${data.id}`;
+                                        window.location.reload();
                                     });
                                 }
                             });
@@ -1171,6 +1174,102 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
                             }
                         });
                     });
+            }
+        });
+    }
+
+    function searchLoan() {
+        Swal.fire({
+            title: 'Pengembalian / Perpanjang Peminjaman',
+            html: `
+            <input type="text" id="id" class="swal2-input" placeholder="ID Peminjaman">
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Cari ID',
+            cancelButtonText: 'Batal',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            },
+            preConfirm: () => {
+                const id = document.getElementById('id').value;
+
+                if (!id) {
+                    Swal.showValidationMessage('ID Peminjaman harus diisi!');
+                    return false;
+                }
+
+                return { id };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/lokapustaka/pages/loans.php?id=${result.value.id}`
+            }
+        });
+    }
+
+    function searchBook() {
+        Swal.fire({
+            title: 'Cari Buku',
+            html: `
+            <input type="text" id="search" class="swal2-input" placeholder="ID, Judul atau ISBN Buku">
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Cari Buku',
+            cancelButtonText: 'Batal',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            },
+            preConfirm: () => {
+                const search = document.getElementById('search').value;
+
+                if (!search) {
+                    Swal.showValidationMessage('Harus diisi!');
+                    return false;
+                }
+
+                return { search };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/lokapustaka/pages/books.php?search=${result.value.search}`
+            }
+        });
+    }
+
+    function searchMember() {
+        Swal.fire({
+            title: 'Cari Member',
+            html: `
+            <input type="text" id="search" class="swal2-input" placeholder="ID atau Nama Anggota">
+        `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Cari Anggota',
+            cancelButtonText: 'Batal',
+            color: '#262626',
+            customClass: {
+                confirmButton: 'pri-color-btn',
+                cancelButton: 'no-color-btn'
+            },
+            preConfirm: () => {
+                const search = document.getElementById('search').value;
+
+                if (!search) {
+                    Swal.showValidationMessage('Harus diisi!');
+                    return false;
+                }
+
+                return { search };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/lokapustaka/pages/members.php?search=${result.value.search}`
             }
         });
     }

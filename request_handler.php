@@ -119,10 +119,10 @@ function handleLogin($conn)
             $_SESSION['users_roles'] = $row['roles'];
             header("Location: /lokapustaka/pages/dashboard.php");
         } else {
-            echo "Password salah!";
+            echo '<script>alert("Password Salah."); history.back()</script>';
         }
     } else {
-        echo "Staff ID tidak ditemukan!";
+        echo '<script>alert("ID Staff tidak ditemukan."); history.back()</script>';
     }
 
     $stmt->close();
@@ -528,7 +528,7 @@ function handleAddBook($conn)
     $author = $_POST['author'];
     $publisher = $_POST['publisher'];
     $year_published = $_POST['year_published'];
-    $stock = $_POST['stock'];
+    $available_stock = $_POST['available_stock'];
     $created_by = $_SESSION['users_id'];
 
     $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ?');
@@ -542,12 +542,12 @@ function handleAddBook($conn)
         echo json_encode(['success' => false, 'message' => 'ISBN sudah terdaftar!']);
     } else {
         $sql = "
-        INSERT INTO books (title, isbn, cover, author, category, publisher, year_published, available_stock, stock, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO books (title, isbn, cover, author, category, publisher, year_published, available_stock,  created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'sssssssiis',
+            'sssssssis',
             $title,
             $isbn,
             $cover,
@@ -555,8 +555,7 @@ function handleAddBook($conn)
             $category,
             $publisher,
             $year_published,
-            $stock,
-            $stock,
+            $available_stock,
             $created_by
         );
 
@@ -577,10 +576,10 @@ function handleAddBook($conn)
 
 function handleEditBook($conn)
 {
-    if (count($_FILES) > 0) {
-        if (is_uploaded_file($_FILES['cover']['tmp_name'])) {
-            $cover = file_get_contents($_FILES['cover']['tmp_name']);
-        }
+    if (count($_FILES) > 0 && is_uploaded_file($_FILES['cover']['tmp_name'])) {
+        $cover = file_get_contents($_FILES['cover']['tmp_name']);
+    } else {
+        $cover = null; // No new cover uploaded
     }
 
     $id = $_POST['id'];
@@ -590,7 +589,7 @@ function handleEditBook($conn)
     $author = $_POST['author'];
     $publisher = $_POST['publisher'];
     $year_published = $_POST['year_published'];
-    $stock = $_POST['stock'];
+    $available_stock = $_POST['available_stock'];
 
     $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ? AND id != ?');
     $stmt->bind_param('ss', $isbn, $id);
@@ -602,37 +601,64 @@ function handleEditBook($conn)
     if ($result->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'ISBN sudah terdaftar!']);
     } else {
-        $sql = "
-        UPDATE books
-        SET 
-            title = ?,
-            isbn = ?,
-            cover = ?,
-            author = ?,
-            category = ?,
-            publisher = ?,
-            year_published = ?,
-            stock = ?
-        WHERE id = ?;
-        ";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param(
-            'sssssssis',
-            $title,
-            $isbn,
-            $cover,
-            $author,
-            $category,
-            $publisher,
-            $year_published,
-            $stock,
-            $id
-        );
+        if ($cover !== null) {
+            $sql = "
+            UPDATE books
+            SET 
+                title = ?,
+                isbn = ?,
+                cover = ?,
+                author = ?,
+                category = ?,
+                publisher = ?,
+                year_published = ?,
+                available_stock = ?
+            WHERE id = ?;
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param(
+                'sssssssis',
+                $title,
+                $isbn,
+                $cover,
+                $author,
+                $category,
+                $publisher,
+                $year_published,
+                $available_stock,
+                $id
+            );
+        } else {
+            $sql = "
+            UPDATE books
+            SET 
+                title = ?,
+                isbn = ?,
+                author = ?,
+                category = ?,
+                publisher = ?,
+                year_published = ?,
+                available_stock = ?
+            WHERE id = ?;
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param(
+                'ssssssis',
+                $title,
+                $isbn,
+                $author,
+                $category,
+                $publisher,
+                $year_published,
+                $available_stock,
+                $id
+            );
+        }
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'id' => $id]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Gagal mendaftarkan buku baru.']);
+            echo json_encode(['success' => false, 'message' => 'Gagal mengedit buku.']);
         }
     }
 }
@@ -698,9 +724,9 @@ function handleAddLoan($conn)
     }
 
     $book_id = $row['id'];
-    $stock = $row['available_stock'];
+    $available_stock = $row['available_stock'];
 
-    if ($stock > 0) {
+    if ($available_stock > 0) {
         $sql = "
         SELECT
             CASE
@@ -806,8 +832,20 @@ function handleDeleteLoan($conn)
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['password'])) {
+            $stmt = $conn->prepare('SELECT book_id FROM loans WHERE id = ?');
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $stmt = $conn->prepare('UPDATE books SET available_stock = (available_stock + 1) WHERE id = ?');
+                $stmt->bind_param('s', $row['book_id']);
+                $stmt->execute();
+            }
+
             $stmt = $conn->prepare('DELETE FROM loans WHERE id = ?');
-            $stmt->bind_param('s', $id);
+            $stmt->bind_param('i', $id);
             if ($stmt->execute()) {
                 echo json_encode(['success' => true]);
             } else {
@@ -826,18 +864,51 @@ function handleExtendLoan($conn)
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'];
 
-    $sql = "SELECT max_extend FROM loans WHERE id = ?";
+    $sql = "
+    SELECT
+        id,
+        CASE
+            WHEN DATEDIFF(NOW(), expected_return_date) <= 0 THEN NULL
+            ELSE DATEDIFF(NOW(), expected_return_date)
+        END AS day_late
+    FROM loans
+    WHERE
+        id = ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    $fines = FINES * $row['day_late'];
+
+    if ($fines !== 0) {
+        $sql = "
+        UPDATE loans SET fines = ? WHERE id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ii', $fines, $id);
+        $stmt->execute();
+    }
+
+    $sql = "SELECT fines, max_extend FROM loans WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $id);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
 
+    if ($row['fines'] !== NULL) {
+        echo json_encode(['success' => false, 'message' => 'Anda telat mengembalikan/memperpanjang. Silahkan bayar denda terlebih dahulu.']);
+        return false;
+    }
+
     if ($row['max_extend'] === 0) {
         $sql = "
         UPDATE loans 
             SET expected_return_date = DATE_ADD(expected_return_date, INTERVAL " . EXPECTED_RETURN_DATE . "), 
-                max_extend = 1 
+                max_extend = 1, fines = NULL 
             WHERE id = ?
         ";
         $stmt = $conn->prepare($sql);
@@ -870,7 +941,7 @@ function handleReturnLoan($conn)
 
     $sql = "
     SELECT
-        id,
+        book_id,
         CASE
             WHEN DATEDIFF(NOW(), expected_return_date) <= 0 THEN NULL
             ELSE DATEDIFF(NOW(), expected_return_date)
@@ -886,16 +957,25 @@ function handleReturnLoan($conn)
     $row = $result->fetch_assoc();
 
     $day_late = $row['day_late'];
-    $fines = 50000 * $day_late;
+    $fines = FINES * $day_late;
 
     if ($fines === 0) {
         $sql = "
-        UPDATE loans SET return_date = NOW() WHERE id = ?
+        UPDATE books SET available_stock = (available_stock + 1) WHERE id = ?
         ";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('i', $id);
+        $stmt->bind_param('s', $row['book_id']);
         if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'id' => $id]);
+            $sql = "
+            UPDATE loans SET return_date = NOW() WHERE id = ?
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $id);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'id' => $id]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal mengakhiri pinjaman.']);
+            }
         } else {
             echo json_encode(['success' => false, 'message' => 'Gagal mengakhiri pinjaman.']);
         }

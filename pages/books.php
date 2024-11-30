@@ -23,7 +23,7 @@ if (isset($_GET['id'])) {
         books.publisher,
         books.year_published,
         books.isbn,
-        books.stock
+        books.available_stock
     FROM books
         LEFT JOIN loans ON loans.book_id = books.id
     WHERE
@@ -281,9 +281,9 @@ if (isset($_GET['id'])) {
                                 value="<?= $book['year_published'] ?>" required>
                         </div>
                         <div class="input-container2">
-                            <label for="stock" class="f12 f-sub mb4">Total Buku*</label>
-                            <input type="text" name="stock" id="stock" placeholder="e.g. 12" value="<?= $book['stock'] ?>"
-                                required>
+                            <label for="available_stock" class="f12 f-sub mb4">Total Buku*</label>
+                            <input type="text" name="available_stock" id="available_stock" placeholder="e.g. 12"
+                                value="<?= $book['available_stock'] ?>" required>
                         </div>
                     </form>
                 </div><br>
@@ -433,8 +433,8 @@ if (isset($_GET['id'])) {
                             <input type="text" name="year_published" id="year_published" placeholder="e.g. 2015" required>
                         </div>
                         <div class="input-container2">
-                            <label for="stock" class="f12 f-sub mb4">Total Buku*</label>
-                            <input type="text" name="stock" id="stock" placeholder="e.g. 12" required>
+                            <label for="available_stock" class="f12 f-sub mb4">Total Buku*</label>
+                            <input type="text" name="available_stock" id="available_stock" placeholder="e.g. 12" required>
                         </div>
                     </form>
                 </div><br>

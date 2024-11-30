@@ -44,7 +44,14 @@ if (isset($_GET['id'])) {
     $stmt->bind_param('s', $id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $loan = $result->fetch_assoc();
+
+    if ($result->num_rows > 0) {
+        $loan = $result->fetch_assoc();
+    } else {
+        ?>
+        <script>alert("Peminjaman tidak ditemukan."); history.back()</script>
+        <?php
+    }
 } else {
     $notReturned = isset($_GET['notReturned']) ? 1 : 0;
 
@@ -133,10 +140,12 @@ if (isset($_GET['id'])) {
                     <h3><?= $loan['id'] ?></h3>
                 </div>
                 <div class="head-button">
-                    <a href="#" onclick="deleteLoan('<?= $loan['id'] ?>')" <?= ($loan['status'] === 'Belum Dikembalikan') ? "class='fou-b head-b mr8'" : "class='red-b head-b'" ?>>
-                        <?= ($loan['status'] === 'Belum Dikembalikan') ? "" : "<img src='/lokapustaka/img/close-light.png' alt='Hapus'>" ?>
-                        Hapus
-                    </a>
+                    <?php if ($_SESSION['users_roles'] === 'Superadmin'): ?>
+                        <a href="#" onclick="deleteLoan('<?= $loan['id'] ?>')" <?= ($loan['status'] === 'Belum Dikembalikan') ? "class='fou-b head-b mr8'" : "class='red-b head-b'" ?>>
+                            <?= ($loan['status'] === 'Belum Dikembalikan') ? "" : "<img src='/lokapustaka/img/close-light.png' alt='Hapus'>" ?>
+                            Hapus
+                        </a>
+                    <?php endif ?>
                     <?php if ($loan['status'] === 'Belum Dikembalikan'): ?>
                         <a href="#" onclick="extendLoan('<?= $loan['id'] ?>')" class="thi-b head-b mr8">
                             <img src="/lokapustaka/img/plus-dark.png" alt="Perpanjang">
@@ -245,7 +254,10 @@ if (isset($_GET['id'])) {
                 <table class="sortable">
                     <thead>
                         <tr>
-                            <th class="w75" data-column="id">ID</th>
+                            <th class="w75" data-column="id">
+                                ID
+                                <img src="/lokapustaka/img/sort-asc.png" alt="Sort Icon" class="sort-icon">
+                            </th>
                             <th class="w75" data-column="book_id">ID Buku</th>
                             <th class="w75" data-column="member_id">ID Peminjam</th>
                             <th data-column="member_name">Nama Peminjam</th>

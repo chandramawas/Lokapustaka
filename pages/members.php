@@ -34,7 +34,8 @@ if (isset($_GET['id'])) {
             WHEN members.created_by IS NULL THEN '[Staff Dihapus]'
             ELSE users.name
         END AS created_by_name,
-        members.created_at
+        members.created_at,
+        SUM(loans.fines) AS total_fines
     FROM members
         LEFT JOIN loans ON members.id = loans.member_id
         LEFT JOIN users ON members.created_by = users.id
@@ -303,6 +304,10 @@ if (isset($_GET['id'])) {
                         <h4 class="mb8"><?= $member['total_loans'] ?> Peminjaman</h4>
                         <p class="f12 f-sub">Peminjaman yang Telat Dikembalikan</p>
                         <h4 class="mb8"><?= $member['late_loans'] ?> Peminjaman</h4>
+                        <?php if ($member['total_fines'] !== NULL): ?>
+                            <p class="f12 f-sub">Jumlah Denda yang Dibayar</p>
+                            <h4 class="mb8">Rp. <?= $member['total_fines'] ?></h4>
+                        <?php endif ?>
                         <p class="f12 f-sub">Didaftarkan oleh</p>
                         <h4 class="mb8"><?= $member['created_by_name'] ?></h4>
                         <p class="f12 f-sub">Tanggal Daftar</p>
@@ -460,7 +465,7 @@ if (isset($_GET['id'])) {
                                     <th class="w125" data-column="phone_num">No Handphone</th>
                                     <th class="w150" data-column="district">Wilayah</th>
                                     <th class="w125" data-column="status">Status</th>
-                                    <th class="w125" data-column="expired_date">Kadaluarsa</th>
+                                    <th class="w125" data-column="expired_date">Masa Aktif</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -492,7 +497,7 @@ if (isset($_GET['id'])) {
                                 <th class="w125" data-column="phone_num">No Handphone</th>
                                 <th class="w150" data-column="district">Wilayah</th>
                                 <th class="w75" data-column="status">Status</th>
-                                <th class="w125" data-column="expired_date">Kadaluarsa</th>
+                                <th class="w125" data-column="expired_date">Masa Aktif</th>
                             </tr>
                         </thead>
                         <tbody>
