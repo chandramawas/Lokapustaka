@@ -1,7 +1,7 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php";
 
-if (empty($_SESSION['users_id']) || empty($_SESSION['users_name']) || empty($_SESSION['users_roles'])) {
+if (empty($_SESSION['staffs_id']) || empty($_SESSION['staffs_name']) || empty($_SESSION['staffs_roles'])) {
     echo '<script>alert("Sesi Habis. Silahkan login kembali!"); location.href = "/lokapustaka/pages/login.php"</script>';
 }
 ?>
@@ -10,9 +10,9 @@ if (empty($_SESSION['users_id']) || empty($_SESSION['users_name']) || empty($_SE
     <div class="logo mb16">
         <img src="/lokapustaka/img/icon.png">
     </div>
-    <p class="font-medium">[<?= $_SESSION['users_roles'] ?>]</p>
-    <p class="font-bold"><?= $_SESSION['users_name'] ?></p>
-    <p class="font-medium mb16"><?= $_SESSION['users_id'] ?></p>
+    <p class="font-medium">[<?= $_SESSION['staffs_roles'] ?>]</p>
+    <p class="font-bold"><?= $_SESSION['staffs_name'] ?></p>
+    <p class="font-medium mb16"><?= $_SESSION['staffs_id'] ?></p>
     <a href="/lokapustaka/pages/dashboard.php" class="opt mb12">
         <img src="/lokapustaka/img/dashboard-light.png" alt="" data-light-src="/lokapustaka/img/dashboard-light.png"
             data-dark-src="/lokapustaka/img/dashboard-dark.png">
@@ -33,7 +33,7 @@ if (empty($_SESSION['users_id']) || empty($_SESSION['users_name']) || empty($_SE
             data-dark-src="/lokapustaka/img/loans-dark.png">
         <p class="font-medium">Peminjaman</p>
     </a>
-    <?php if ($_SESSION['users_roles'] == 'Admin' || $_SESSION['users_roles'] == 'Superadmin'): ?>
+    <?php if ($_SESSION['staffs_roles'] == 'Admin' || $_SESSION['staffs_roles'] == 'Superadmin'): ?>
         <a href="/lokapustaka/pages/staff.php" class="opt mb12">
             <img src="/lokapustaka/img/staff-dark.png" alt="" data-light-src="/lokapustaka/img/staff-light.png"
                 data-dark-src="/lokapustaka/img/staff-dark.png">

@@ -32,13 +32,13 @@ if (isset($_GET['id'])) {
         ) AS late_loans,
         CASE
             WHEN members.created_by IS NULL THEN '[Staff Dihapus]'
-            ELSE users.name
+            ELSE staffs.name
         END AS created_by_name,
         members.created_at,
         SUM(loans.fines) AS total_fines
     FROM members
         LEFT JOIN loans ON members.id = loans.member_id
-        LEFT JOIN users ON members.created_by = users.id
+        LEFT JOIN staffs ON members.created_by = staffs.id
     WHERE
         members.id = ?
     GROUP BY

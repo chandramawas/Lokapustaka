@@ -14,8 +14,8 @@ if (isset($_GET['id'])) {
             WHEN a.created_by = 'root' THEN NULL
             ELSE b.name
         END AS created_by_name
-    FROM users as a
-        LEFT JOIN users AS b ON a.created_by = b.id
+    FROM staffs as a
+        LEFT JOIN staffs AS b ON a.created_by = b.id
     WHERE
         a.id = ?
     ";
@@ -34,7 +34,7 @@ if (isset($_GET['id'])) {
 } else {
     $stmt = $conn->prepare("
     SELECT id, name, phone_num, roles
-    FROM users
+    FROM staffs
     WHERE
         roles = 'Admin'
         OR roles = 'Staff'
@@ -49,7 +49,7 @@ if (isset($_GET['id'])) {
 
         $sql = "
         SELECT id, name, phone_num, roles
-        FROM users
+        FROM staffs
         WHERE (
                 roles = 'Admin'
                 OR roles = 'Staff'

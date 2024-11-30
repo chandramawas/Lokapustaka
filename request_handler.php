@@ -103,7 +103,7 @@ function handleLogin($conn)
     $password = $_POST['password'];
 
     // Query ke database
-    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT * FROM staffs WHERE id = ?");
     $stmt->bind_param("s", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -114,9 +114,9 @@ function handleLogin($conn)
         // Verifikasi password
         if (password_verify($password, $row['password'])) {
             // Login berhasil
-            $_SESSION['users_id'] = $row['id'];
-            $_SESSION['users_name'] = $row['name'];
-            $_SESSION['users_roles'] = $row['roles'];
+            $_SESSION['staffs_id'] = $row['id'];
+            $_SESSION['staffs_name'] = $row['name'];
+            $_SESSION['staffs_roles'] = $row['roles'];
             header("Location: /lokapustaka/pages/dashboard.php");
         } else {
             echo '<script>alert("Password Salah."); history.back()</script>';
@@ -139,7 +139,7 @@ function handleLogout()
 
 function handleChangePassword($conn)
 {
-    $userId = $_SESSION['users_id'];
+    $userId = $_SESSION['staffs_id'];
 
     // Get the JSON data sent via fetch
     $data = json_decode(file_get_contents('php://input'), true);
@@ -147,7 +147,7 @@ function handleChangePassword($conn)
     $newPassword = $data['newPassword'];
 
     // Fetch the user's current password from the database
-    $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT password FROM staffs WHERE id = ?");
     $stmt->bind_param("s", $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -163,7 +163,7 @@ function handleChangePassword($conn)
     $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
 
     // Update the password in the database
-    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE staffs SET password = ? WHERE id = ?");
     $stmt->bind_param("ss", $newPasswordHash, $userId);
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
@@ -191,11 +191,11 @@ function handleAddStaff($conn)
     $name = $data['name'];
     $phone_num = $data['phone_num'];
     $roles = $data['roles'];
-    $created_by = $_SESSION['users_id'];
+    $created_by = $_SESSION['staffs_id'];
     $password = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
 
     // Check if the phone number already exists
-    $stmt = $conn->prepare('SELECT id FROM users WHERE phone_num = ?');
+    $stmt = $conn->prepare('SELECT id FROM staffs WHERE phone_num = ?');
     $stmt->bind_param('s', $phone_num);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -205,11 +205,11 @@ function handleAddStaff($conn)
         echo json_encode(['success' => false, 'message' => 'No Telepon sudah terdaftar!']);
     } else {
         // Insert new staff into the database
-        $stmt = $conn->prepare('INSERT INTO users (name, password, phone_num, roles, created_by) VALUES (?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO staffs (name, password, phone_num, roles, created_by) VALUES (?, ?, ?, ?, ?)');
         $stmt->bind_param('sssss', $name, $password, $phone_num, $roles, $created_by);
 
         if ($stmt->execute()) {
-            $stmt = $conn->prepare('SELECT id FROM users WHERE name = ? AND phone_num = ? AND roles = ? AND created_by = ?');
+            $stmt = $conn->prepare('SELECT id FROM staffs WHERE name = ? AND phone_num = ? AND roles = ? AND created_by = ?');
             $stmt->bind_param('ssss', $name, $phone_num, $roles, $created_by);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -244,7 +244,7 @@ function handleEditStaff($conn)
     $phone_num = $data['phone_num'];
     $roles = $data['roles'];
 
-    $stmt = $conn->prepare('SELECT id FROM users WHERE phone_num = ? AND id != ?');
+    $stmt = $conn->prepare('SELECT id FROM staffs WHERE phone_num = ? AND id != ?');
     $stmt->bind_param('ss', $phone_num, $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -252,14 +252,14 @@ function handleEditStaff($conn)
     if ($result->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'No Telepon sudah terdaftar!']);
     } else {
-        $sql = "UPDATE users SET name = ?, phone_num = ?, roles = ? WHERE  id = ?";
+        $sql = "UPDATE staffs SET name = ?, phone_num = ?, roles = ? WHERE  id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('ssss', $name, $phone_num, $roles, $id);
 
         if ($stmt->execute()) {
-            if ($id === $_SESSION['users_id']) {
-                $_SESSION['users_name'] = $name;
-                $_SESSION['users_roles'] = $roles;
+            if ($id === $_SESSION['staffs_id']) {
+                $_SESSION['staffs_name'] = $name;
+                $_SESSION['staffs_roles'] = $roles;
             }
 
             echo json_encode(['success' => true, 'id' => $id]);
@@ -276,8 +276,8 @@ function handleDeleteStaff($conn)
     $password = $data['password'];
     $id = $data['id'];
 
-    $stmt = $conn->prepare('SELECT * FROM users WHERE id = ?');
-    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt = $conn->prepare('SELECT * FROM staffs WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['staffs_id']);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -285,11 +285,11 @@ function handleDeleteStaff($conn)
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['password'])) {
-            $stmt = $conn->prepare('UPDATE users SET created_by = NULL WHERE created_by = ?');
+            $stmt = $conn->prepare('UPDATE staffs SET created_by = NULL WHERE created_by = ?');
             $stmt->bind_param('s', $id);
             $stmt->execute();
 
-            $stmt = $conn->prepare('DELETE FROM users WHERE id = ?');
+            $stmt = $conn->prepare('DELETE FROM staffs WHERE id = ?');
             $stmt->bind_param('s', $id);
             if ($stmt->execute()) {
                 echo json_encode(['success' => true]);
@@ -309,7 +309,7 @@ function handleResetPassword($conn)
     $id = $data['id'];
     $password = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare('UPDATE users SET password = ? WHERE id = ?');
+    $stmt = $conn->prepare('UPDATE staffs SET password = ? WHERE id = ?');
     $stmt->bind_param('ss', $password, $id);
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
@@ -341,7 +341,7 @@ function handleAddMember($conn)
     $district = $data['district'];
     $village = $data['village'];
     $postal_code = $data['postal_code'];
-    $created_by = $_SESSION['users_id'];
+    $created_by = $_SESSION['staffs_id'];
 
     // Check if the phone number already exists
     $stmt = $conn->prepare('SELECT * FROM members WHERE phone_num = ?');
@@ -466,8 +466,8 @@ function handleDeleteMember($conn)
     $password = $data['password'];
     $id = $data['id'];
 
-    $stmt = $conn->prepare('SELECT * FROM users WHERE id = ?');
-    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt = $conn->prepare('SELECT * FROM staffs WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['staffs_id']);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -529,7 +529,7 @@ function handleAddBook($conn)
     $publisher = $_POST['publisher'];
     $year_published = $_POST['year_published'];
     $available_stock = $_POST['available_stock'];
-    $created_by = $_SESSION['users_id'];
+    $created_by = $_SESSION['staffs_id'];
 
     $stmt = $conn->prepare('SELECT id FROM books WHERE isbn = ?');
     $stmt->bind_param('s', $isbn);
@@ -669,8 +669,8 @@ function handleDeleteBook($conn)
     $password = $data['password'];
     $id = $data['id'];
 
-    $stmt = $conn->prepare('SELECT * FROM users WHERE id = ?');
-    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt = $conn->prepare('SELECT * FROM staffs WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['staffs_id']);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -707,7 +707,7 @@ function handleAddLoan($conn)
     $book_id_isbn = $data['book_id_isbn'];
     $member_id = $data['member_id'];
     $phone_num = $data['phone_num'];
-    $created_by = $_SESSION['users_id'];
+    $created_by = $_SESSION['staffs_id'];
 
     $sql = "
     SELECT id, available_stock, isbn FROM books WHERE id = ? OR isbn = ?
@@ -823,8 +823,8 @@ function handleDeleteLoan($conn)
     $password = $data['password'];
     $id = $data['id'];
 
-    $stmt = $conn->prepare('SELECT password FROM users WHERE id = ?');
-    $stmt->bind_param('s', $_SESSION['users_id']);
+    $stmt = $conn->prepare('SELECT password FROM staffs WHERE id = ?');
+    $stmt->bind_param('s', $_SESSION['staffs_id']);
     $stmt->execute();
     $result = $stmt->get_result();
 
