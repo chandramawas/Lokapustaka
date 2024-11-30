@@ -96,7 +96,7 @@ if (isset($_GET['id'])) {
         id,
         name,
         phone_num,
-        district,
+        village,
         CASE
             WHEN expired_date > NOW() THEN 'Aktif'
             ELSE 'Kadaluarsa'
@@ -124,7 +124,7 @@ if (isset($_GET['id'])) {
             id,
             name,
             phone_num,
-            district,
+            village,
             CASE
                 WHEN expired_date > NOW() THEN 'Aktif'
                 ELSE 'Kadaluarsa'
@@ -475,7 +475,7 @@ if (isset($_GET['id'])) {
                                         <td class="t-center"><?= $searchedMember['id'] ?></td>
                                         <td><?= $searchedMember['name'] ?></td>
                                         <td><?= formatPhoneNumber($searchedMember['phone_num']) ?></td>
-                                        <td><?= $searchedMember['district'] ?></td>
+                                        <td><?= $searchedMember['village'] ?></td>
                                         <td class="t-center"><?= $searchedMember['status'] ?></td>
                                         <td class="t-center"><?= formatDate($searchedMember['expired_date']) ?></td>
                                     </tr>
@@ -506,7 +506,7 @@ if (isset($_GET['id'])) {
                                     <td class="t-center"><?= $member['id'] ?></td>
                                     <td><?= $member['name'] ?></td>
                                     <td><?= formatPhoneNumber($member['phone_num']) ?></td>
-                                    <td><?= $member['district'] ?></td>
+                                    <td><?= $member['village'] ?></td>
                                     <td class="t-center"><?= $member['status'] ?></td>
                                     <td class="t-center"><?= formatDate($member['expired_date']) ?></td>
                                 </tr>
