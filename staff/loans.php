@@ -140,7 +140,7 @@ if (isset($_GET['id'])) {
                     <h3><?= $loan['id'] ?></h3>
                 </div>
                 <div class="head-button">
-                    <?php if ($_SESSION['staffs_roles'] === 'Superadmin'): ?>
+                    <?php if ($_SESSION['staffs_roles'] === 'Superadmin' || $_SESSION['staffs_roles'] === 'Admin'): ?>
                         <a href="#" onclick="deleteLoan('<?= $loan['id'] ?>')" <?= ($loan['status'] === 'Belum Dikembalikan') ? "class='fou-b head-b mr8'" : "class='red-b head-b'" ?>>
                             <?= ($loan['status'] === 'Belum Dikembalikan') ? "" : "<img src='/lokapustaka/img/close-light.png' alt='Hapus'>" ?>
                             Hapus
