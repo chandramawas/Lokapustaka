@@ -28,7 +28,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
     </div>
     <div class="aside bot">
         <?php if (!empty($_SESSION['members_id']) || !empty($_SESSION['members_name']) || !empty($_SESSION['members_expired_date']) || !empty($_SESSION['members_phone_num'])): ?>
-            <p class="mb4">Masa Aktif sd. <?= formatDate($_SESSION['members_expired_date']) ?></p>
+            <p class="t-center f12 mb4">Masa Aktif sd. <?= formatDate($_SESSION['members_expired_date']) ?></p>
             <hr class="mb4">
             <a href="#" class="exit" onclick="changePassword()">
                 <img src="/lokapustaka/img/password-dark.png" alt="" data-light-src="/lokapustaka/img/password-light.png"

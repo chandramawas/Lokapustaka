@@ -236,9 +236,9 @@ $result = $stmt->get_result();
                     <?php while ($loan_list = $result->fetch_assoc()): ?>
                         <div class="container3 scroll" onclick="location.href='?id=<?= $loan_list['id'] ?>'">
                             <?php if ($loan_list['cover'] !== NULL): ?>
-                                <img src="/lokapustaka/image_view.php?id=<?= $loan_list['book_id'] ?>" alt="Cover" class="cover mr12">
+                                <img src="/lokapustaka/image_view.php?id=<?= $loan_list['book_id'] ?>" alt="Cover" class="cover mb8">
                             <?php else: ?>
-                                <img src="/lokapustaka/img/default-cover.jpg" alt="Cover" class="cover mr12">
+                                <img src="/lokapustaka/img/default-cover.jpg" alt="Cover" class="cover mb8">
                             <?php endif ?>
                             <p class="f-sub f12"><?= $loan_list['id'] ?></p>
                             <p class="f12"><?= $loan_list['return_date'] ?></p>

@@ -169,10 +169,6 @@ $result = $stmt->get_result();
                             placeholder="Cari ID, ISBN, Judul"
                             value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                     </form>
-                    <a href="?action=add" class="sec-b head-b">
-                        <img src="/lokapustaka/img/plus-light.png" alt="Tambah">
-                        Tambah
-                    </a>
                 </div>
             </div>
             <div class="main">
