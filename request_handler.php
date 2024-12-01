@@ -426,7 +426,7 @@ function handleAddMember($conn)
         ";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'ssssssssss',
+            'sssssssssss',
             $name,
             $phone_num,
             $password,

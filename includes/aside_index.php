@@ -7,13 +7,18 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
         <img src="/lokapustaka/img/icon.png" onclick="location.href='/lokapustaka/'" style="cursor: pointer;">
     </div>
     <div class="aside top">
+        <hr class="mb4">
         <?php if (!empty($_SESSION['members_id']) || !empty($_SESSION['members_name']) || !empty($_SESSION['members_expired_date']) || !empty($_SESSION['members_phone_num'])): ?>
-            <hr class="mb4">
             <p class="font-medium">[<?= $_SESSION['members_id'] ?>]</p>
             <p class="font-bold"><?= $_SESSION['members_name'] ?></p>
             <p class="mb4"><?= $_SESSION['members_phone_num'] ?></p>
+            <hr class="mb4">
+            <a href="/lokapustaka/pages/member_loans.php" class="opt">
+                <img src="/lokapustaka/img/loans-dark.png" alt="" data-light-src="/lokapustaka/img/loans-light.png"
+                    data-dark-src="/lokapustaka/img/loans-dark.png">
+                <p class="font-medium">Peminjaman Saya</p>
+            </a>
         <?php endif ?>
-        <hr class="mb4">
         <a href="/lokapustaka/" class="opt mb4">
             <img src="/lokapustaka/img/books-dark.png" alt="" data-light-src="/lokapustaka/img/books-light.png"
                 data-dark-src="/lokapustaka/img/books-dark.png">
@@ -32,7 +37,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
             </a>
             <a href="#" class="exit" onclick="logout()">
                 <img src="/lokapustaka/img/exit.png" alt="">
-                <p class="font-medium f-red">Ganti Sesi</p>
+                <p class="font-medium f-red">Logout</p>
             </a>
         <?php else: ?>
             <hr class="mb4">

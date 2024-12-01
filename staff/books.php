@@ -308,7 +308,7 @@ if (isset($_GET['id'])) {
                     <?php if ($book['cover'] !== NULL): ?>
                         <img src="/lokapustaka/image_view.php?id=<?= $book["id"]; ?>" alt="Cover" class="cover mr12">
                     <?php else: ?>
-                        <img src="/lokapustaka/img/default-cover.png" alt="Cover" class="cover mr12">
+                        <img src="/lokapustaka/img/default-cover.jpg" alt="Cover" class="cover mr12">
                     <?php endif ?>
                     <div class="content">
                         <p class="f12 f-sub">ISBN</p>

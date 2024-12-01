@@ -7,7 +7,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/config.php";
 <script>
     function logout() {
         Swal.fire({
-            title: 'Ganti Sesi?',
+            title: 'Logout?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Iya',

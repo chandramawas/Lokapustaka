@@ -57,7 +57,7 @@ if (empty($_SESSION['staffs_id']) || empty($_SESSION['staffs_name']) || empty($_
         </a>
         <a href="#" class="exit" onclick="logout()">
             <img src="/lokapustaka/img/exit.png" alt="">
-            <p class="font-medium f-red">Ganti Sesi</p>
+            <p class="font-medium f-red">Logout</p>
         </a>
     </div>
 </aside>
