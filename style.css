@@ -285,7 +285,6 @@ input[type=checkbox] {
 
 .fou-b {
     border-radius: 8px;
-    padding: 16px;
     text-align: center;
     color: var(--red);
     text-decoration: underline;
@@ -293,6 +292,17 @@ input[type=checkbox] {
 
 .fou-b:hover {
     color: var(--red-hover);
+}
+
+.fou-b.border {
+    color: var(--red);
+    border: 1px solid var(--red);
+    text-decoration: none;
+}
+
+.fou-b.border:hover {
+    color: var(--red-hover);
+    box-shadow: var(--shadow);
 }
 
 .red-b {

@@ -276,7 +276,7 @@ if (isset($_GET['id'])) {
                         <a href="#" onclick="resetPassword('<?= $member['id'] ?>')" class="fou-b head-b mr8">
                             Reset Password
                         </a>
-                        <a href="#" onclick="deleteMember('<?= $member['id'] ?>')" class="fou-b head-b mr8">Hapus</a>
+                        <a href="#" onclick="deleteMember('<?= $member['id'] ?>')" class="fou-b border head-b mr12">Hapus</a>
                         <a href="?id=<?= $member['id'] ?>&action=edit" class="thi-b head-b mr8">
                             <img src="/lokapustaka/img/edit-dark.png" alt="Edit">
                             Edit
