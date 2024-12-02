@@ -168,7 +168,7 @@ $result = $stmt->get_result();
                     <h3><?= $loan['id'] ?></h3>
                 </div>
                 <div class="head-button">
-                    <?php if ($loan['extend'] === 'Belum' && $loan['status'] === 'Belum Dikembalikan'): ?>
+                    <?php if ($loan['status'] === 'Belum Dikembalikan'): ?>
                         <a href="#" onclick="extendLoan('<?= $loan['id'] ?>')" class="sec-b head-b mr8">
                             <img src="/lokapustaka/img/plus-light.png" alt="Perpanjang">
                             Perpanjang
