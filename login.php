@@ -34,7 +34,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/config/db.php";
                 </div>
                 <input type="submit" value="Masuk" class="sec-b mb16">
             </form>
-            <p onclick="window.location.href='/lokapustaka/'" class="t-center f-redir2 f12">Kembali</p>
+            <p onclick="window.location.href='/lokapustaka/'" class="t-center f-redir2 f12">Kembali ke Halaman Utama</p>
         </div>
     </div>
 </body>

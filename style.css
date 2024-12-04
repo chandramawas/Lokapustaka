@@ -402,7 +402,7 @@ input[type=checkbox] {
 }
 
 .container.dashboard.button:hover {
-    background-color: var(--c-200);
+    box-shadow: var(--shadow);
     cursor: pointer;
 }
 
@@ -486,6 +486,13 @@ aside::-webkit-scrollbar {
 .exit img {
     width: 20px;
     margin-right: 8px;
+}
+
+.opt:hover,
+.exit:hover {
+    background-color: var(--c-300);
+    border-radius: 4px;
+    transition: background-color 0.4s ease;
 }
 
 .opt.active {

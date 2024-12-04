@@ -851,9 +851,7 @@ function handleAddLoan($conn)
                     if ($stmt->execute()) {
                         $id = $conn->insert_id;
 
-                        $sql = "
-                        UPDATE books SET available_stock = (available_stock - 1) WHERE id = ?
-                        ";
+                        $sql = "UPDATE books SET available_stock = (available_stock - 1) WHERE id = ?";
                         $stmt = $conn->prepare($sql);
                         $stmt->bind_param('s', $book_id);
                         $stmt->execute();

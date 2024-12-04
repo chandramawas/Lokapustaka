@@ -23,12 +23,12 @@ if (empty($_SESSION['staffs_id']) || empty($_SESSION['staffs_name']) || empty($_
             <p class="font-medium">Dasbor</p>
         </a>
         <hr class="mb4">
-        <a href="/lokapustaka/staff/books.php" class="opt">
+        <a href="/lokapustaka/staff/books.php" class="opt mb4">
             <img src="/lokapustaka/img/books-dark.png" alt="" data-light-src="/lokapustaka/img/books-light.png"
                 data-dark-src="/lokapustaka/img/books-dark.png">
             <p class="font-medium">Buku</p>
         </a>
-        <a href="/lokapustaka/staff/members.php" class="opt">
+        <a href="/lokapustaka/staff/members.php" class="opt mb4">
             <img src="/lokapustaka/img/members-dark.png" alt="" data-light-src="/lokapustaka/img/members-light.png"
                 data-dark-src="/lokapustaka/img/members-dark.png">
             <p class="font-medium">Anggota</p>
@@ -50,7 +50,7 @@ if (empty($_SESSION['staffs_id']) || empty($_SESSION['staffs_name']) || empty($_
     </div>
     <div class="aside bot">
         <hr class="mb4">
-        <a href="#" class="exit" onclick="changePassword()">
+        <a href="#" class="exit  mb4" onclick="changePassword()">
             <img src="/lokapustaka/img/password-dark.png" alt="" data-light-src="/lokapustaka/img/password-light.png"
                 data-dark-src="/lokapustaka/img/password-dark.png">
             <p class="font-medium">Ganti Password</p>

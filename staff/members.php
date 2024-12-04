@@ -35,7 +35,12 @@ if (isset($_GET['id'])) {
             ELSE staffs.name
         END AS created_by_name,
         members.created_at,
-        SUM(loans.fines) AS total_fines
+        SUM(
+            CASE
+                WHEN loans.return_date IS NOT NULL THEN loans.fines
+                ELSE 0
+            END
+        ) AS total_fines
     FROM members
         LEFT JOIN loans ON members.id = loans.member_id
         LEFT JOIN staffs ON members.created_by = staffs.id

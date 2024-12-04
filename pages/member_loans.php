@@ -102,7 +102,7 @@ SELECT
         WHEN books.cover IS NOT NULL THEN 1
         ELSE NULL
     END cover,
-    loans.return_date,
+    loans.borrow_date,
     books.title,
     CASE
         WHEN DATEDIFF(
@@ -119,6 +119,8 @@ FROM loans
 WHERE
     return_date IS NOT NULL
     AND member_id = ?
+ORDER BY
+    id DESC
 ";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $_SESSION['members_id']);
@@ -241,7 +243,7 @@ $result = $stmt->get_result();
                                 <img src="/lokapustaka/img/default-cover.jpg" alt="Cover" class="cover mb8">
                             <?php endif ?>
                             <p class="f-sub f12"><?= $loan_list['id'] ?></p>
-                            <p class="f12"><?= $loan_list['return_date'] ?></p>
+                            <p class="f12"><?= $loan_list['borrow_date'] ?></p>
                             <p class="font-bold f14"><?= $loan_list['title'] ?></p>
                             <p class="f-sub f12">
                                 <?= ($loan_list['day_late'] !== NULL) ? 'Telat ' . $loan_list['day_late'] . ' Hari' : 'Tepat Waktu' ?>
