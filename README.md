@@ -1,7 +1,3 @@
-Saya akan menambahkan informasi akun default ke README.
-
----
-
 # Lokapustaka
 
 **Lokapustaka** adalah sistem manajemen perpustakaan berbasis web yang dibuat untuk mengelola data buku, anggota, peminjaman, dan pengembalian secara digital. Proyek ini dibangun menggunakan **PHP**, **MySQL**, **HTML**, **CSS**, dan **JavaScript**. Sistem ini juga mendukung pengelolaan denda, serta memiliki fitur manajemen keanggotaan yang dapat diperpanjang.
