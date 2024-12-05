@@ -30,6 +30,14 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/lokapustaka/includes/sweet_alert.php"
         <?php if (!empty($_SESSION['members_id']) || !empty($_SESSION['members_name']) || !empty($_SESSION['members_expired_date']) || !empty($_SESSION['members_phone_num'])): ?>
             <p class="t-center f12 mb4">Masa Aktif sd. <?= formatDate($_SESSION['members_expired_date']) ?></p>
             <hr class="mb4">
+        <?php endif ?>
+        <a href="/lokapustaka/pages/rules.php" class="opt mb4">
+            <img src="/lokapustaka/img/rules-dark.png" alt="" data-light-src="/lokapustaka/img/rules-light.png"
+                data-dark-src="/lokapustaka/img/rules-dark.png">
+            <p class="font-medium">Peraturan</p>
+        </a>
+        <?php if (!empty($_SESSION['members_id']) || !empty($_SESSION['members_name']) || !empty($_SESSION['members_expired_date']) || !empty($_SESSION['members_phone_num'])): ?>
+            <hr class="mb4">
             <a href="#" class="exit" onclick="changePassword()">
                 <img src="/lokapustaka/img/password-dark.png" alt="" data-light-src="/lokapustaka/img/password-light.png"
                     data-dark-src="/lokapustaka/img/password-dark.png">
